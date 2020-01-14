@@ -117,7 +117,7 @@ class InkrementalModulePlugin : Plugin<Project> {
             extensions.getByType<InkrementalMetaExtension>().modules.forEach {
                 when(it.type) {
                     InkrementalType.SDK -> {
-                        registerAnvilPublications("Sdk15", "Sdk15", prop("POM_ARTIFACT_SDK15_ID")!!)
+                        registerAnvilPublications("Sdk17", "Sdk17", prop("POM_ARTIFACT_SDK17_ID")!!)
                         registerAnvilPublications("Sdk19", "Sdk19", prop("POM_ARTIFACT_SDK19_ID")!!)
                         registerAnvilPublications("Sdk21", "Sdk21", prop("POM_ARTIFACT_SDK21_ID")!!)
                     }
