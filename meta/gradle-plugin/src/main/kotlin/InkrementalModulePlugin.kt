@@ -64,8 +64,8 @@ class InkrementalModulePlugin : Plugin<Project> {
             add("archives", javadocJar)
         }
 
-        val bintrayUser = prop("bintrayUser")
-        val bintrayApiKey = prop("bintrayApiKey")
+        val bintrayUser = prop("bintrayUser") ?: System.getenv("BINTRAY_USER")
+        val bintrayApiKey = prop("bintrayApiKey") ?: System.getenv("BINTRAY_API_KEY")
         if(bintrayUser != null && bintrayApiKey != null) {
             extensions.configure<PublishingExtension> {
                 repositories {

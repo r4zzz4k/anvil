@@ -1,4 +1,4 @@
-name: CI
+name: Build on non-master push
 
 on:
   push:
@@ -18,13 +18,6 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-
-    - name: Setup Android SDK tools and platforms
-      run: |
-        wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
-        sudo unzip -d $ANDROID_HOME android-sdk.zip > /dev/null 
-        echo "y" | sudo $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-15" > /dev/null
-        echo "y" | sudo $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null
 
     - name: Cache Gradle wrapper dist
       uses: actions/cache@v1
