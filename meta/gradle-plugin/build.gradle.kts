@@ -11,9 +11,14 @@ repositories {
 
 dependencies {
     implementation(project(":model"))
-    implementation(project(":introspect-android"))
+    implementation(project(":introspect-android")) {
+        exclude("org.jetbrains.kotlin", "kotlin-compiler")
+    }
     implementation(project(":introspect-ios")) {
-        exclude("org.jetbrains.kotlin", "kotlin-native-library-reader")
+        exclude("org.jetbrains.kotlin", "kotlin-compiler")
+    }
+    implementation(project(":introspect-js")) {
+        exclude("org.jetbrains.kotlin", "kotlin-compiler")
     }
 
     //compileClasspath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.60")

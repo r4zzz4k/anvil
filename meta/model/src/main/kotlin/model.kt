@@ -29,12 +29,11 @@ data class ModuleModel(
     val modulePackage: String,
     val manualSetter: MemberName? = null,
     val views: List<ViewModel> = listOf()
-)
-
-fun ModuleModel.backlink(): ModuleModel = apply {
-    views.forEach {
-        it.owner = this
-        it.backlink()
+) {
+    init {
+        views.forEach {
+            it.owner = this
+        }
     }
 }
 
@@ -47,6 +46,26 @@ data class ViewModel(
     var superType: ViewModelSupertype? = null
 ) {
     @Transient lateinit var owner: ModuleModel
+
+    init {
+        attrs.forEach { it.owner = this }
+    }
+}
+
+class MutableViewModel {
+    var name: String = ""
+    var plainType: ClassName? = null
+    var parametrizedType: ParameterizedTypeName? = null
+    val attrs: MutableList<AttrModel> = mutableListOf()
+    var superType: ViewModelSupertype? = null
+
+    fun build(): ViewModel = ViewModel(
+        name,
+        plainType!!,
+        parametrizedType,
+        attrs,
+        superType
+    )
 }
 
 val ViewModel.isRoot: Boolean
@@ -72,10 +91,6 @@ sealed class ViewModelSupertype {
     class Resolved(val type: ViewModel) : ViewModelSupertype()
     @Serializable
     class Unresolved(val references: List<String>) : ViewModelSupertype()
-}
-
-fun ViewModel.backlink(): ViewModel = apply {
-    attrs.forEach { it.owner = this }
 }
 
 val ViewModel.starProjectedType: TypeName

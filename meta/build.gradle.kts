@@ -1,8 +1,9 @@
 import java.util.*
 
 plugins {
-    kotlin("jvm") version "1.3.60" apply false
-    kotlin("plugin.serialization") version "1.3.60" apply false
+    kotlin("jvm") version "1.3.61" apply false
+    kotlin("plugin.serialization") version "1.3.61" apply false
+    id("de.undercouch.download") version "4.0.4" apply false
 }
 
 fun loadProperties(fileName: String) =

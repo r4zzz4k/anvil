@@ -21,12 +21,12 @@ abstract class GenerateDslTask : DefaultTask() {
 
         configuration?.resolvedConfiguration?.resolvedArtifacts
             ?.map { it.file }
-            ?.map { json.parse(ModuleModel.serializer(), it.readText()).backlink() }
+            ?.map { json.parse(ModuleModel.serializer(), it.readText()) }
             ?.flatMap { it.views }
             ?.forEach { superResolver.processView(it) }
 
         val inputStr = modelFile.readText()
-        val model = json.parse(ModuleModel.serializer(), inputStr).backlink()
+        val model = json.parse(ModuleModel.serializer(), inputStr)
         model.views.forEach { superResolver.processView(it) }
 
         superResolver.finalize()
