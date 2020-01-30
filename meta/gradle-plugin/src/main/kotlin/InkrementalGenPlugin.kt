@@ -45,8 +45,11 @@ class InkrementalGenPlugin @Inject constructor(
             to.attribute(ARTIFACT_FORMAT, ArtifactTypeDefinition.JAR_TYPE)
         }
 
-        // "implementation" extends from "api", so it's also covered
-        configurations["api"].extendsFrom(genConfiguration)
+        pluginManager.withPlugin("org.gradle.java") {
+            // "implementation" extends from "api", so it's also covered
+            configurations["api"].extendsFrom(genConfiguration)
+        }
+        // TODO multiplatform
 
         afterEvaluate {
             extension.modules.forEach { module ->
@@ -173,7 +176,12 @@ private inline fun <reified T: GenerateModelTask> Project.createDslTasks(
     }
 
     if(prop("dontGenerateCodeOnBuild") != "true") {
-        listOf("Debug", "Release").forEach { tasks.getByName("compile${variantName}${it}Kotlin").dependsOn(dslTask) }
+        listOf("Debug", "Release").forEach {
+            // kotlin-android
+            tasks.findByName("compile${variantName}${it}Kotlin")?.dependsOn(dslTask)
+            // kotlin-multiplatform
+            tasks.findByName("compile${variantName}${it}Sources")?.dependsOn(dslTask)
+        }
     }
     return modelTask to dslTask
 }

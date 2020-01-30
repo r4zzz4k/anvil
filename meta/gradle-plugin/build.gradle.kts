@@ -21,10 +21,8 @@ dependencies {
         exclude("org.jetbrains.kotlin", "kotlin-compiler")
     }
 
-    //compileClasspath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.60")
-    //runtimeClasspath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.60")
-    compileClasspath("com.android.tools.build:gradle:3.5.3")
-    runtimeClasspath("com.android.tools.build:gradle:3.5.3")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.61")
+    implementation("com.android.tools.build:gradle:3.5.3")
 }
 
 gradlePlugin {
@@ -32,6 +30,10 @@ gradlePlugin {
         register("module") {
             id = "dev.inkremental.module"
             implementationClass = "dev.inkremental.meta.gradle.InkrementalModulePlugin"
+        }
+        register("module.multiplatform") {
+            id = "dev.inkremental.module.multiplatform"
+            implementationClass = "dev.inkremental.meta.gradle.InkrementalModuleMppPlugin"
         }
     }
 }

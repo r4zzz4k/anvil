@@ -1,7 +1,7 @@
 plugins {
+    kotlin("multiplatform")
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("dev.inkremental.module")
+    id("dev.inkremental.module.multiplatform")
 }
 
 android {
@@ -79,9 +79,6 @@ inkremental {
     }
 }
 
-dependencies {
-    val mockito_version: String by project.extra
-
-    implementation("androidx.annotation:annotation:1.1.0")
-    testImplementation("org.mockito:mockito-core:$mockito_version")
+kotlin.sourceSets.getByName("androidTest").dependencies {
+    implementation("org.mockito:mockito-core:${extra["mockito_version"]}")
 }

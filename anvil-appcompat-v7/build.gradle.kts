@@ -41,14 +41,8 @@ inkremental {
 }
 
 dependencies {
-	val junit_version: String by project.extra
-	val mockito_version: String by project.extra
-
 	implementation(project(":anvil"))
 	inkremental(project(":anvil", "inkrementalDefSdk17"))
 
 	inkrementalGen("androidx.appcompat:appcompat:1.1.0")
-
-	testImplementation("junit:junit:$junit_version")
-	testImplementation("org.mockito:mockito-core:$mockito_version")
 }

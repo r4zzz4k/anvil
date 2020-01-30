@@ -19,6 +19,14 @@ rootProject.name = "inkremental-root"
 
 includeBuild("meta")
 
+fun includeSpecific(projectName: String, projectDir: File) {
+    include(projectName)
+    project(":$projectName").projectDir = projectDir
+}
+
+include(":core")
+//includeSpecific("android-core", file("android/core"))
+
 include(
     ":anvil",
     ":anvil-support-v4",
