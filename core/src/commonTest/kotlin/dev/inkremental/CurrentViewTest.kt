@@ -7,7 +7,7 @@ import dev.inkremental.dsl.android.widget.FrameLayoutScope
 import kotlin.test.*
 
 
-class CurrentViewTest : Utils() {
+class CurrentViewTest : InkrementalTest() {
     @Test
     fun testCurrentView() {
         assertNull(Inkremental.currentView())

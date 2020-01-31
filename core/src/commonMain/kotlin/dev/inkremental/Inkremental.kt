@@ -1,15 +1,6 @@
 package dev.inkremental
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import java.lang.ref.WeakReference
-import java.lang.reflect.InvocationTargetException
-import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * Anvil class is a namespace for top-level static methods and interfaces. Most
@@ -20,22 +11,27 @@ import java.util.*
  * Anvil library.
  */
 object Inkremental {
+
+    /**
+     * Represents currently rendered Mount point. Must be accessed from the
+     * Renderable's view() method, otherwise it returns null
+     */
+    var currentMount: Mount? = null
+        private set
+
     private val mounts: MutableMap<View, Mount> = WeakHashMap()
-    private var currentMount: Mount? = null
-    private var anvilUIHandler: Handler? = null
-    private val viewFactories: MutableList<ViewFactory> = mutableListOf<ViewFactory>().apply {
-        add(DefaultViewFactory())
+    private var uiHandler = UiHandler()
+    private val viewFactories: MutableList<ViewFactory> = mutableListOf()
+    private val attributeSetters: MutableList<AttributeSetter<Any>> = mutableListOf()
+
+    init {
+        initPlatform()
     }
 
     fun registerViewFactory(viewFactory: ViewFactory) {
         if (!viewFactories.contains(viewFactory)) {
             viewFactories.add(0, viewFactory)
         }
-    }
-
-    private val anvilRenderRunnable = Runnable { render() }
-    private val attributeSetters: MutableList<AttributeSetter<Any>> = mutableListOf<AttributeSetter<Any>>().apply {
-        add(PropertySetter())
     }
 
     fun registerAttributeSetter(setter: AttributeSetter<Any>) {
@@ -47,16 +43,12 @@ object Inkremental {
     /** Tags: arbitrary data bound to specific views, such as last cached attribute values  */
     private val tags: MutableMap<View, MutableMap<String, Any?>> = WeakHashMap()
 
-    operator fun set(v: View, key: String, value: Any?) {
-        var attrs = tags[v]
-        if (attrs == null) {
-            attrs = HashMap()
-            tags[v] = attrs
-        }
+    fun set(v: View, key: String, value: Any?) {
+        val attrs = tags.getOrPut(v) { hashMapOf() }
         attrs[key] = value
     }
 
-    operator fun get(v: View?, key: String): Any? {
+    fun get(v: View?, key: String): Any? {
         val attrs = tags[v] ?: return null
         return attrs[key]
     }
@@ -66,22 +58,8 @@ object Inkremental {
      * been changed since last rendering cycle will be actually updated in the
      * views. This method can be called from any thread, so it's safe to use
      * `Anvil.render()` in background services.  */
-    fun render() { // If Anvil.render() is called on a non-UI thread, use UI Handler
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            synchronized(Inkremental::class.java) {
-                if (anvilUIHandler == null) {
-                    anvilUIHandler = Handler(Looper.getMainLooper())
-                }
-            }
-            anvilUIHandler?.removeCallbacksAndMessages(null)
-            anvilUIHandler?.post(anvilRenderRunnable)
-            return
-        }
-        val set: MutableSet<Mount> = mutableSetOf()
-        set.addAll(mounts.values)
-        for (m in set) {
-            render(m)
-        }
+    fun render() = uiHandler.runOnUiThread {
+        mounts.values.toSet().forEach { render(it) }
     }
 
     /**
@@ -92,8 +70,7 @@ object Inkremental {
      * @param r a Renderable to mount into a View
      */
     fun <T : View> mount(v: T, r: () -> Unit): T {
-        val m = Mount(v, r)
-        mounts[v] = m
+        mounts[v] = Mount(v, r)
         render(v)
         return v
     }
@@ -103,42 +80,25 @@ object Inkremental {
      * views inside the parent ViewGroup, which acted as a mount point.
      * @param v A mount point to unmount from its View
      */
-    @JvmOverloads
     fun unmount(v: View?, removeChildren: Boolean = true) {
         val m = mounts[v]
         if (m != null) {
             mounts.remove(v)
             if (v is ViewGroup) {
-                val viewGroup = v
-                val childCount = viewGroup.childCount
-                for (i in 0 until childCount) {
-                    unmount(viewGroup.getChildAt(i))
-                }
+                v.children.forEach { unmount(it) }
                 if (removeChildren) {
-                    viewGroup.removeViews(0, childCount)
+                    v.removeAllChildren()
                 }
             }
         }
     }
 
     /**
-     * Returns currently rendered Mount point. Must be called from the
-     * Renderable's view() method, otherwise it returns null
-     * @return current mount point
-     */
-    fun currentMount(): Mount? {
-        return currentMount
-    }
-
-    /**
      * Returns currently rendered View. It allows to access the real view from
      * inside the [Renderable].
      */
-    fun <T : View?> currentView(): T? {
-        return if (currentMount == null) {
-            null
-        } else currentMount?.iterator?.currentView() as T?
-    }
+    fun <T : View?> currentView(): T? =
+        currentMount?.iterator?.currentView() as T?
 
     fun render(v: View?) {
         val m = mounts[v] ?: return
@@ -160,28 +120,8 @@ object Inkremental {
     }
 
     interface ViewFactory {
-        fun fromClass(c: Context?, v: Class<out View?>): View?
+        fun fromClass(c: Context?, v: KClass<out View>): View?
         fun fromXml(parent: ViewGroup, xmlId: Int): View?
-    }
-
-    internal class DefaultViewFactory : ViewFactory {
-        override fun fromClass(c: Context?, viewClass: Class<out View?>): View? {
-            return try {
-                viewClass.getConstructor(Context::class.java).newInstance(c)
-            } catch (e: InvocationTargetException) {
-                throw RuntimeException(e)
-            } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
-            } catch (e: NoSuchMethodException) {
-                throw RuntimeException(e)
-            } catch (e: InstantiationException) {
-                throw RuntimeException(e)
-            }
-        }
-
-        override fun fromXml(parent: ViewGroup, xmlId: Int): View? {
-            return LayoutInflater.from(parent.context).inflate(xmlId, parent, false)
-        }
     }
 
     interface AttributeSetter<T> {
@@ -196,31 +136,30 @@ object Inkremental {
         private val rootView: WeakReference<View> = WeakReference(v)
         internal val iterator = Iterator()
 
-        @SuppressLint("Assert")
         internal inner class Iterator {
-            var views: Deque<View?> = ArrayDeque()
-            var indices: Deque<Int> = ArrayDeque()
+            var views: Deque<View?> = Deque()
+            var indices: Deque<Int> = Deque()
             fun start() {
-                assert(views.size == 0)
-                assert(indices.size == 0)
+                require(views.size == 0)
+                require(indices.size == 0)
                 indices.push(0)
-                val v = rootView.get()
+                val v = rootView.value
                 if (v != null) {
                     views.push(v)
                 }
             }
 
-            fun start(c: Class<out View?>?, layoutId: Int) {
-                val i = indices.peek()
+            fun start(c: KClass<out View>?, layoutId: Int) {
+                val i = indices.peek()!!
                 val parentView = (views.peek() ?: return) as? ViewGroup
                         ?: throw RuntimeException("child views are allowed only inside view groups")
                 val vg = parentView
                 var v: View? = null
-                if (i < vg.childCount) {
+                if (i < vg.childrenCount) {
                     v = vg.getChildAt(i)
                 }
-                val context = rootView.get()!!.context
-                if (c != null && (v == null || v.javaClass != c)) {
+                val context = rootView.value!!.context
+                if (c != null && (v == null || v::class != c)) {
                     vg.removeView(v)
                     for (vf in viewFactories) {
                         v = vf.fromClass(context, c)
@@ -230,7 +169,7 @@ object Inkremental {
                             break
                         }
                     }
-                } else if (c == null && (v == null || Integer.valueOf(layoutId) != get(v, "_layoutId"))) {
+                } else if (c == null && (v == null || layoutId != get(v, "_layoutId"))) {
                     vg.removeView(v)
                     for (vf in viewFactories) {
                         v = vf.fromXml(vg, layoutId)
@@ -242,20 +181,20 @@ object Inkremental {
                         }
                     }
                 }
-                assert(v != null)
+                checkNotNull(v)
                 views.push(v)
                 indices.push(indices.pop() + 1)
                 indices.push(0)
             }
 
             fun end() {
-                val index = indices.peek()
+                val index = indices.peek()!!
                 val v = views.peek()
                 if (v != null && v is ViewGroup && get(v, "_layoutId") == null &&
                         (mounts[v] == null || mounts[v] === this@Mount)) {
                     val vg = v
-                    if (index < vg.childCount) {
-                        removeNonAnvilViews(vg, index, vg.childCount - index)
+                    if (index < vg.childrenCount) {
+                        removeNonAnvilViews(vg, index, vg.childrenCount - index)
                     }
                 }
                 indices.pop()
@@ -266,7 +205,7 @@ object Inkremental {
 
             fun <T : Any> attr(name: String, value: T?) {
                 val currentView = views.peek() ?: return
-                val currentValue = get(currentView, name) as T?
+                val currentValue = get(currentView, name) as? T?
                 if (currentValue == null || currentValue != value) {
                     for (setter in attributeSetters) {
                         if (setter.set(currentView, name, value, currentValue)) {
@@ -288,10 +227,9 @@ object Inkremental {
             }
 
             fun skip() {
-                var i: Int
-                val vg = views.peek() as ViewGroup?
-                i = indices.pop()
-                while (i < vg!!.childCount) {
+                var i = indices.pop()
+                val vg = views.peek() as ViewGroup
+                while (i < vg.childrenCount) {
                     val v = vg.getChildAt(i)
                     if (get(v, "_anvil") != null) {
                         indices.push(i)
@@ -306,6 +244,5 @@ object Inkremental {
                 return views.peek()
             }
         }
-
     }
 }

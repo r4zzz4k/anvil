@@ -54,10 +54,10 @@ class BenchmarkTest : Utils() {
 
     private fun group(i: Int, r: () -> Unit) {
         v<MockLayout, FrameLayoutScope>(FrameLayoutScope) {
-            id(i * 100)
-            tag("layout")
-            r()
-        }
+                id(i * 100)
+                tag("layout")
+                r()
+            }
     }
 
     private fun item(i: Int) {
