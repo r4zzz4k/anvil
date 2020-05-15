@@ -28,6 +28,13 @@ include(
     ":anvil-design",
     ":anvil-recyclerview-v7",
     ":anvil-constraintlayout",
-    ":anvil-yogalayout",
-    ":sample"
+    ":anvil-yogalayout"
 )
+
+// Include projects from `samples` directory.
+// `samples/android-showcase` is available as `:sample-android-showcase`.
+file("samples").listFiles()?.forEach { dir ->
+    val projectName = "sample-${dir.name}"
+    include(projectName)
+    project(":$projectName").projectDir = dir
+}
