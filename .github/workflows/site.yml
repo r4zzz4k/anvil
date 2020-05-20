@@ -3,11 +3,12 @@ name: Update GitHub Pages static site
 on:
   push:
     branches: master
-    paths: 'docs/**'
+    paths: [ 'docs/**', '.github/workflows/site.yml' ]
 
 jobs:
   site-publish:
     runs-on: ubuntu-latest
+    if: "!contains(format('{0} {1} {2}', github.event.head_commit.message, github.event.pull_request.title, github.event.pull_request.body), '[skip ci]')"
     steps:
     - uses: actions/checkout@v2
 
@@ -18,10 +19,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gems-
 
-    #- uses: helaili/jekyll-action@eb6eabe # v2.0.2
+#   - uses: helaili/jekyll-action@eb6eabe # v2.0.2
     - uses: r4zzz4k/jekyll-action@263712c
       env:
         JEKYLL_PAT: ${{ secrets.JEKYLL_PAT }}
       with:
         jekyll_root: docs
-

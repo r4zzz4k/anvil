@@ -3,13 +3,14 @@ name: Publish on master push
 on:
   push:
     branches: master
-    paths-ignore: 'docs/**'
+    paths-ignore: [ 'docs/**', '.github/workflows/site.yml' ]
   repository_dispatch:
     types: publish
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "!contains(format('{0} {1} {2}', github.event.head_commit.message, github.event.pull_request.title, github.event.pull_request.body), '[skip ci]')"
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
