@@ -14,15 +14,14 @@ jobs:
 
     - uses: actions/cache@v1
       with:
-        path: docs/vendor/bundle
+        path: vendor/bundle
         key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
         restore-keys: |
           ${{ runner.os }}-gems-
 
 #   - uses: helaili/jekyll-action@eb6eabe # v2.0.2
-    - uses: r4zzz4k/jekyll-action@7caebcc
+    - uses: r4zzz4k/jekyll-action@751fccc
       env:
         JEKYLL_PAT: ${{ secrets.JEKYLL_PAT }}
       with:
         jekyll_src: docs
-        gem_src: docs
