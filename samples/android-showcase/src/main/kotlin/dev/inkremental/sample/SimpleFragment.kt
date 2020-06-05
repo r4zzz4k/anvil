@@ -1,25 +1,21 @@
 package dev.inkremental.sample
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import dev.inkremental.dsl.android.*
 import dev.inkremental.dsl.android.Size.MATCH
 import dev.inkremental.dsl.android.Size.WRAP
-import dev.inkremental.dsl.android.widget.button
-import dev.inkremental.dsl.android.widget.linearLayout
-import dev.inkremental.dsl.android.widget.textView
-import dev.inkremental.renderable
+import dev.inkremental.dsl.android.widget.*
+import dev.inkremental.dsl.androidx.appcompat.renderable
 
 class SimpleFragment : Fragment() {
 
     var ticktock = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return renderable(inflater.context) {
+        return renderable {
             linearLayout {
                 size(MATCH, MATCH)
                 padding(8.dp)
