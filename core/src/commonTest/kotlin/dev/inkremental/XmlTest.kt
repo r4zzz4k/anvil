@@ -31,7 +31,7 @@ class XmlTest : Utils() {
 
     init {
         Inkremental.registerViewFactory(object : Inkremental.ViewFactory {
-            override fun fromClass(c: Context?, v: Class<out View?>): View? = null
+            override fun fromClass(c: Context?, v: Class<out View>): View? = null
 
             override fun fromXml(parent: ViewGroup, xmlId: Int): View? {
                 if (xmlId == LAYOUT) {

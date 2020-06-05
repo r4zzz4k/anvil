@@ -6,15 +6,19 @@ import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import dev.inkremental.platform.View
+import dev.inkremental.platform.ViewGroup
 import org.junit.After
 import org.junit.Before
+import kotlin.reflect.KClass
+import kotlin.test.BeforeTest
 
-@TargetApi(Build.VERSION_CODES.KITKAT)
 open class Utils {
-    var createdViews: MutableMap<Class<*>, Int?> = mutableMapOf()
+    var createdViews: MutableMap<KClass<*>, Int?> = mutableMapOf()
     var changedAttrs: MutableMap<String, Int?> = mutableMapOf()
     var empty = {  }
     lateinit var container: MockLayout
+
     @Before
     fun setUp() {
         changedAttrs.clear()
@@ -114,15 +118,15 @@ open class Utils {
     }
 
     init {
-        Inkremental.registerAttributeSetter(object : Inkremental.AttributeSetter<Any> {
+        Inkremental.registerAttributeSetter(object : InkrementalBase.AttributeSetter<Any> {
             override fun set(v: View, name: String, value: Any?, prevValue: Any?): Boolean {
                 changedAttrs[name] = if (!changedAttrs.containsKey(name)) 1 else changedAttrs[name]!! + 1
                 return false
             }
         })
-        Inkremental.registerViewFactory(object : Inkremental.ViewFactory {
-            override fun fromClass(c: Context?, v: Class<out View?>): View? {
-                createdViews[v] = if (!createdViews.containsKey(v)) 1 else createdViews[v]!! + 1
+        Inkremental.registerViewFactory(object : InkrementalBase.ViewFactory {
+            override fun fromClass(parent: ViewGroup, viewClass: KClass<out View>): View? {
+                createdViews[viewClass] = if (!createdViews.containsKey(viewClass)) 1 else createdViews[viewClass]!! + 1
                 return null
             }
             override fun fromXml(parent: ViewGroup, xmlId: Int): View? = null

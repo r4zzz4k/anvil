@@ -20,6 +20,7 @@ rootProject.name = "inkremental-root"
 includeBuild("meta")
 
 include(
+    ":core",
     ":anvil",
     ":anvil-support-v4",
     ":anvil-appcompat-v7",

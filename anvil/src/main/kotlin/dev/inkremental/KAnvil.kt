@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
-import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import androidx.annotation.IdRes
@@ -17,7 +16,7 @@ import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
 fun v(c: KClass<out View>, r: () -> Unit = {}) {
-    Inkremental.currentMount()?.iterator?.start(c.java, 0)
+    Inkremental.currentMount()?.iterator?.start(c, 0)
     r()
     end()
 }
