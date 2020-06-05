@@ -14,6 +14,7 @@ import android.view.*
 import android.widget.*
 import androidx.annotation.ColorRes
 import androidx.annotation.RequiresApi
+import dev.inkremental.ATTR_INIT
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.dip
@@ -44,15 +45,13 @@ const val CLIP_HORIZONTAL = Gravity.CLIP_HORIZONTAL
 const val START = Gravity.START
 const val END = Gravity.END
 
-const val INIT_LITERAL = "init"
-
 inline class Sp(val value: Float)
 inline class Dip(val value: Int)
 inline class Px(val value: Int)
 
 inline class ColorState(@ColorRes val value : Int)
 
-fun ViewScope.init(action: (View) -> Unit) = attr(INIT_LITERAL, action)
+fun ViewScope.init(action: (View) -> Unit) = attr(ATTR_INIT, action)
 fun ViewScope.size(w: Size, h: Size) = attr("size", w to h)
 fun ViewScope.tag(key: Int, value: Any?) = attr("tag", key to value)
 
@@ -149,13 +148,6 @@ inline fun verticalLayout(crossinline r: LinearLayoutScope.() -> Unit) {
 
 object CustomSdkSetter : Inkremental.AttributeSetter<Any> {
     override fun set(v: View, name: String, value: Any?, prevValue: Any?): Boolean = when (name) {
-        INIT_LITERAL -> when (value) {
-            is Function<*> -> {
-                (value as (View) -> Any?)(v)
-                true
-            }
-            else -> false
-        }
         "tag" -> when {
             value is Pair<*, *> -> {
                 v.setTag(value.first as Int, value.second)

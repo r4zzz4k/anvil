@@ -1,42 +1,32 @@
 package dev.inkremental
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import dev.inkremental.dsl.android.INIT_LITERAL
-import java.lang.ref.WeakReference
-import java.lang.reflect.InvocationTargetException
-import java.util.*
+import dev.inkremental.platform.*
+import kotlin.jvm.JvmOverloads
+import kotlin.reflect.KClass
 
 /**
- * Anvil class is a namespace for top-level static methods and interfaces. Most
- * users would only use it to call `Anvil.render()`.
+ * Inkremental class is a namespace for top-level static methods and interfaces. Most
+ * users would only use it to call `Inkremental.render()`.
  *
- * Internally, Anvil class defines how [Renderable] are mounted into Views
+ * Internally, Inkremental class defines how [Renderable] are mounted into Views
  * and how they are lazily rendered, and this is the key functionality of the
- * Anvil library.
+ * Inkremental library.
  */
 object Inkremental {
     private val mounts: MutableMap<View, Mount> = WeakHashMap()
     private var currentMount: Mount? = null
-    private var anvilUIHandler: Handler? = null
-    private val viewFactories: MutableList<ViewFactory> = mutableListOf<ViewFactory>().apply {
-        add(DefaultViewFactory())
+    private val viewFactories: MutableList<ViewFactory> = mutableListOf()
+    private val attributeSetters: MutableList<AttributeSetter<Any>> = mutableListOf()
+    private val renderUiSwitcher: UiSwitcher = UiSwitcher { render() }
+
+    init {
+        platformInit()
     }
 
     fun registerViewFactory(viewFactory: ViewFactory) {
         if (!viewFactories.contains(viewFactory)) {
             viewFactories.add(0, viewFactory)
         }
-    }
-
-    private val anvilRenderRunnable = Runnable { render() }
-    private val attributeSetters: MutableList<AttributeSetter<Any>> = mutableListOf<AttributeSetter<Any>>().apply {
-        add(PropertySetter())
     }
 
     fun registerAttributeSetter(setter: AttributeSetter<Any>) {
@@ -51,21 +41,8 @@ object Inkremental {
      * views. This method can be called from any thread, so it's safe to use
      * `Anvil.render()` in background services.  */
     fun render() { // If Anvil.render() is called on a non-UI thread, use UI Handler
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            synchronized(Inkremental::class.java) {
-                if (anvilUIHandler == null) {
-                    anvilUIHandler = Handler(Looper.getMainLooper())
-                }
-            }
-            anvilUIHandler?.removeCallbacksAndMessages(null)
-            anvilUIHandler?.post(anvilRenderRunnable)
-            return
-        }
-        val set: MutableSet<Mount> = mutableSetOf()
-        set.addAll(mounts.values)
-        for (m in set) {
-            render(m)
-        }
+        if(renderUiSwitcher.scheduleOnUi()) return
+        mounts.values.toSet().forEach { render(it) }
     }
 
     /**
@@ -95,12 +72,12 @@ object Inkremental {
             m.cleanTags()
             if (v is ViewGroup) {
                 val viewGroup = v
-                val childCount = viewGroup.childCount
+                val childCount = viewGroup.childrenCount
                 for (i in 0 until childCount) {
-                    unmount(viewGroup.getChildAt(i))
+                    unmount(viewGroup.childAt(i))
                 }
                 if (removeChildren) {
-                    viewGroup.removeViews(0, childCount)
+                    viewGroup.clearChildren()
                 }
             }
         }
@@ -145,28 +122,8 @@ object Inkremental {
     }
 
     interface ViewFactory {
-        fun fromClass(c: Context?, v: Class<out View?>): View?
+        fun fromClass(parent: ViewGroup, viewClass: KClass<out View>): View?
         fun fromXml(parent: ViewGroup, xmlId: Int): View?
-    }
-
-    internal class DefaultViewFactory : ViewFactory {
-        override fun fromClass(c: Context?, viewClass: Class<out View?>): View? {
-            return try {
-                viewClass.getConstructor(Context::class.java).newInstance(c)
-            } catch (e: InvocationTargetException) {
-                throw RuntimeException(e)
-            } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
-            } catch (e: NoSuchMethodException) {
-                throw RuntimeException(e)
-            } catch (e: InstantiationException) {
-                throw RuntimeException(e)
-            }
-        }
-
-        override fun fromXml(parent: ViewGroup, xmlId: Int): View? {
-            return LayoutInflater.from(parent.context).inflate(xmlId, parent, false)
-        }
     }
 
     interface AttributeSetter<T> {
@@ -179,13 +136,13 @@ object Inkremental {
     class Mount(v: View, val renderable: () -> Unit) {
         var lock = false
         private val rootView: WeakReference<View> = WeakReference(v)
-        internal val iterator = Iterator()
+        val iterator = Iterator()
 
         /** Tags: arbitrary data bound to specific views, such as last cached attribute values  */
         private val tags: MutableMap<View, MutableMap<String, Any?>> = WeakHashMap()
 
         operator fun set(v: View, key: String, value: Any?) {
-            val attrs = tags.getOrPut(v) { HashMap() }
+            val attrs = tags.getOrPut(v) { mutableMapOf() }
             attrs[key] = value
         }
 
@@ -197,115 +154,119 @@ object Inkremental {
             tags.clear()
         }
 
-        @SuppressLint("Assert")
-        internal inner class Iterator {
-            var views: Deque<View?> = ArrayDeque()
-            var indices: Deque<Int> = ArrayDeque()
+        @OptIn(ExperimentalStdlibApi::class)
+        inner class Iterator {
+            var views: ArrayDeque<View?> = ArrayDeque()
+            var indices: ArrayDeque<Int> = ArrayDeque()
             fun start() {
-                assert(views.size == 0)
-                assert(indices.size == 0)
-                indices.push(0)
+                require(views.size == 0)
+                require(indices.size == 0)
+                indices.addLast(0)
                 val v = rootView.get()
                 if (v != null) {
-                    views.push(v)
+                    views.addLast(v)
                 }
             }
 
-            fun start(c: Class<out View?>?, layoutId: Int) {
-                val i = indices.peek()
-                val parentView = (views.peek() ?: return) as? ViewGroup
-                        ?: throw RuntimeException("child views are allowed only inside view groups")
+            fun start(c: KClass<out View>?, layoutId: Int) {
+                val i = indices.last()
+                val parentView = (views.last() ?: return) as? ViewGroup
+                    ?: throw RuntimeException("child views are allowed only inside view groups")
                 val vg = parentView
                 var v: View? = null
-                if (i < vg.childCount) {
-                    v = vg.getChildAt(i)
+                if (i < vg.childrenCount) {
+                    v = vg.childAt(i)
                 }
-                val context = rootView.get()!!.context
-                if (c != null && (v == null || v.javaClass != c)) {
-                    vg.removeView(v)
+                val rootView = rootView.get()!!
+                if (c != null && (v == null || v::class != c)) {
+                    vg.removeChild(v)
                     for (vf in viewFactories) {
-                        v = vf.fromClass(context, c)
+                        v = vf.fromClass(vg, c)
                         if (v != null) {
                             set(v, "_anvil", 1)
-                            vg.addView(v, i)
+                            vg.addChild(v, i)
                             break
                         }
                     }
-                } else if (c == null && (v == null || Integer.valueOf(layoutId) != get(v, "_layoutId"))) {
-                    vg.removeView(v)
+                } else if (c == null && (v == null || layoutId != get(v, "_layoutId"))) {
+                    vg.removeChild(v)
                     for (vf in viewFactories) {
                         v = vf.fromXml(vg, layoutId)
                         if (v != null) {
                             set(v, "_anvil", 1)
                             set(v, "_layoutId", layoutId)
-                            vg.addView(v, i)
+                            vg.addChild(v, i)
                             break
                         }
                     }
                 }
-                assert(v != null)
-                views.push(v)
-                indices.push(indices.pop() + 1)
-                indices.push(0)
+                check(v != null)
+                views.addLast(v)
+                indices.addLast(indices.removeLast() + 1)
+                indices.addLast(0)
             }
 
             fun end() {
-                val index = indices.peek()
-                val v = views.peek()
+                val index = indices.last()
+                val v = views.last()
                 if (v != null && v is ViewGroup && get(v, "_layoutId") == null &&
-                        (mounts[v] == null || mounts[v] === this@Mount)) {
+                    (mounts[v] == null || mounts[v] === this@Mount)) {
                     val vg = v
-                    if (index < vg.childCount) {
-                        removeNonAnvilViews(vg, index, vg.childCount - index)
+                    if (index < vg.childrenCount) {
+                        removeNonAnvilViews(vg, index, vg.childrenCount - index)
                     }
                 }
-                indices.pop()
+                indices.removeLast()
                 if (v != null) {
-                    views.pop()
+                    views.removeLast()
                 }
             }
 
             fun <T : Any> attr(name: String, value: T?) {
-                val currentView = views.peek() ?: return
+                val currentView = views.last() ?: return
                 val currentValue = get(currentView, name) as T?
-                if (currentValue == null || (currentValue != value && name != INIT_LITERAL)) {
+                if (currentValue == null || (currentValue != value && name != ATTR_INIT)) {
                     for (setter in attributeSetters) {
                         if (setter.set(currentView, name, value, currentValue)) {
-                            set(currentView, name, if ( name != INIT_LITERAL) value else true)
+                            set(currentView, name, if (name != ATTR_INIT) value else true)
                             return
                         }
                     }
+                } else if (name == ATTR_INIT && value is Function<*>) {
+                    (value as (View) -> Any?)(currentView)
                 }
             }
 
             private fun removeNonAnvilViews(vg: ViewGroup, start: Int, count: Int) {
                 val end = start + count - 1
                 for (i in end downTo start) {
-                    val v = vg.getChildAt(i)
+                    val v = vg.childAt(i)
                     if (get(v, "_anvil") != null) {
-                        vg.removeView(v)
+                        vg.removeChild(v)
                     }
                 }
             }
 
             fun skip() {
-                val vg = views.peek() as ViewGroup?
-                var i: Int = indices.pop()
-                while (i < vg!!.childCount) {
-                    val v = vg.getChildAt(i)
+                val vg = views.last() as ViewGroup
+                var i: Int = indices.removeLast()
+                while (i < vg.childrenCount) {
+                    val v = vg.childAt(i)
                     if (get(v, "_anvil") != null) {
-                        indices.push(i)
+                        indices.addLast(i)
                         return
                     }
                     i++
                 }
-                indices.push(i)
+                indices.addLast(i)
             }
 
             fun currentView(): View? {
-                return views.peek()
+                return views.lastOrNull()
             }
         }
 
     }
 }
+
+val ATTR_INIT = "init"

@@ -89,6 +89,7 @@ dependencies {
 	val junit_version: String by project.extra
 	val mockito_version: String by project.extra
 
+	api(project(":core"))
 	implementation("androidx.annotation:annotation:1.1.0")
 	testImplementation("junit:junit:$junit_version")
 	testImplementation("org.mockito:mockito-core:$mockito_version")
