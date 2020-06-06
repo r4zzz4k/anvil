@@ -3,7 +3,7 @@ package dev.inkremental.sample
 import android.os.Bundle
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import dev.inkremental.*
+import dev.inkremental.android.*
 import dev.inkremental.dsl.android.*
 import dev.inkremental.dsl.android.widget.LinearLayoutScope
 import dev.inkremental.dsl.android.widget.TextViewScope

@@ -1,4 +1,4 @@
-package dev.inkremental.platform
+package dev.inkremental.android
 
 import android.view.View
 import dev.inkremental.Inkremental

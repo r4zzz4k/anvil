@@ -1,12 +1,14 @@
-package dev.inkremental.platform
+package dev.inkremental.android
 
 import android.content.Context
 import android.view.LayoutInflater
 import dev.inkremental.Inkremental
+import dev.inkremental.platform.View
+import dev.inkremental.platform.ViewGroup
 import java.lang.reflect.InvocationTargetException
 import kotlin.reflect.KClass
 
-internal class DefaultViewFactory : Inkremental.ViewFactory {
+internal class AndroidViewFactory : Inkremental.ViewFactory {
     override fun fromClass(parent: ViewGroup, viewClass: KClass<out View>): View? {
         return try {
             viewClass.java.getConstructor(Context::class.java).newInstance(parent.context)

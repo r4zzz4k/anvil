@@ -5,13 +5,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.facebook.soloader.SoLoader
 import com.facebook.yoga.YogaAlign
 import com.facebook.yoga.YogaFlexDirection
-import dev.inkremental.dsl.android.Size.MATCH
-import dev.inkremental.dsl.android.Size.WRAP
+import dev.inkremental.android.Size.*
+import dev.inkremental.android.renderableContentView
 import dev.inkremental.dsl.android.size
 import dev.inkremental.dsl.android.text
 import dev.inkremental.dsl.android.widget.*
 import dev.inkremental.dsl.yoga.yogaLayout
-import dev.inkremental.renderableContentView
 
 
 class YogaActivity : AppCompatActivity() {

@@ -20,6 +20,7 @@ object Inkremental {
     private val renderUiSwitcher: UiSwitcher = UiSwitcher { render() }
 
     init {
+        registerAttributeSetter(RootAttributeSetter())
         platformInit()
     }
 
@@ -177,7 +178,6 @@ object Inkremental {
                 if (i < vg.childrenCount) {
                     v = vg.childAt(i)
                 }
-                val rootView = rootView.get()!!
                 if (c != null && (v == null || v::class != c)) {
                     vg.removeChild(v)
                     for (vf in viewFactories) {
@@ -232,8 +232,6 @@ object Inkremental {
                             return
                         }
                     }
-                } else if (name == ATTR_INIT && value is Function<*>) {
-                    (value as (View) -> Any?)(currentView)
                 }
             }
 
@@ -268,5 +266,3 @@ object Inkremental {
 
     }
 }
-
-val ATTR_INIT = "init"

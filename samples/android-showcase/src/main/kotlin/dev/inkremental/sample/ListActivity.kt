@@ -2,16 +2,14 @@ package dev.inkremental.sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import dev.inkremental.android.CENTER
+import dev.inkremental.android.Size.*
+import dev.inkremental.android.renderableContentView
 import dev.inkremental.dsl.android.*
-import dev.inkremental.dsl.android.Size.MATCH
-import dev.inkremental.dsl.android.Size.WRAP
-import dev.inkremental.dsl.android.widget.button
-import dev.inkremental.dsl.android.widget.frameLayout
-import dev.inkremental.dsl.android.widget.linearLayout
-import dev.inkremental.dsl.android.widget.textView
-import dev.inkremental.dsl.androidx.recyclerview.*
+import dev.inkremental.dsl.android.widget.*
+import dev.inkremental.dsl.androidx.recyclerview.InkrementalDiffCallback
 import dev.inkremental.dsl.androidx.recyclerview.RecyclerLayoutType.*
-import dev.inkremental.renderableContentView
+import dev.inkremental.dsl.androidx.recyclerview.list
 
 class ListActivity : AppCompatActivity() {
 

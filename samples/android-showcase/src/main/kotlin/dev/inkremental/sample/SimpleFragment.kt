@@ -4,9 +4,8 @@ import android.os.Bundle
 import android.view.*
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
+import dev.inkremental.android.Size.*
 import dev.inkremental.dsl.android.*
-import dev.inkremental.dsl.android.Size.MATCH
-import dev.inkremental.dsl.android.Size.WRAP
 import dev.inkremental.dsl.android.widget.*
 import dev.inkremental.dsl.androidx.appcompat.renderable
 
