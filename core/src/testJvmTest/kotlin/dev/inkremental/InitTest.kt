@@ -1,10 +1,7 @@
 package dev.inkremental
 
-import android.view.View
-import dev.inkremental.dsl.android.init
-import dev.inkremental.dsl.android.view.ViewScope
+import dev.inkremental.platform.View
 import kotlin.test.*
-
 
 class InitTest : Utils() {
     var called: MutableMap<String, Boolean?> = mutableMapOf()
@@ -14,7 +11,9 @@ class InitTest : Utils() {
         println("============================")
         Inkremental.mount(container) {
             //init(makeFunc("once"))
-            v<MockView, ViewScope>(ViewScope) { init(makeFunc("setUpView")) }
+            v<View, RootViewScope>(RootViewScope) {
+                init(makeFunc("setUpView"))
+            }
         }
         println("============================")
         //assertTrue(called["once"]!!)
@@ -27,9 +26,7 @@ class InitTest : Utils() {
 
     // new function will be created each time, but only the first one should be called
     private fun makeFunc(id: String): (View) -> Unit = {
-        if (called.containsKey(id)) {
-            throw RuntimeException("Init func called more than once!")
-        }
+        require(!called.containsKey(id)) { "Init func for $id called more than once!" }
         called[id] = true
     }
 }

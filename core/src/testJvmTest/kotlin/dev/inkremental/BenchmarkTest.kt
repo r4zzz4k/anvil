@@ -1,9 +1,7 @@
 package dev.inkremental
 
-import kotlin.random.Random
-import kotlin.test.Test
-import kotlin.time.measureTime
-
+/*
+@ExperimentalTime
 class BenchmarkTest : Utils() {
     private var mode = 0
     @Test
@@ -53,7 +51,7 @@ class BenchmarkTest : Utils() {
     }
 
     private fun group(i: Int, r: () -> Unit) {
-        v<MockLayout, FrameLayoutScope>(FrameLayoutScope) {
+        v<ViewGroup, FrameLayoutScope>(FrameLayoutScope) {
             id(i * 100)
             tag("layout")
             r()
@@ -61,7 +59,7 @@ class BenchmarkTest : Utils() {
     }
 
     private fun item(i: Int) {
-        v<MockView, ViewScope>(ViewScope) {
+        v<View, ViewScope>(ViewScope) {
             id(i)
             tag("item$i")
         }
@@ -71,3 +69,4 @@ class BenchmarkTest : Utils() {
         private const val N = 100000
     }
 }
+*/

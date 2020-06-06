@@ -39,7 +39,7 @@ fun Fragment.renderable(
 
 inline fun <reified S: RootViewScope> xml(@LayoutRes layoutId: Int, s: S, noinline r: S.() -> Unit = {}) = xml(layoutId, r.bind(s))
 fun xml(@LayoutRes layoutId: Int, r: () -> Unit = {}) {
-    Inkremental.currentMount()?.iterator?.start(null, layoutId)
+    Inkremental.currentMount?.iterator?.start(null, layoutId)
     r()
     end()
 }

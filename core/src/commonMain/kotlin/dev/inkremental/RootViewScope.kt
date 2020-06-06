@@ -7,4 +7,4 @@ abstract class RootViewScope {
     companion object : RootViewScope()
 }
 
-val ATTR_INIT = "init"
+internal const val ATTR_INIT = "init"
