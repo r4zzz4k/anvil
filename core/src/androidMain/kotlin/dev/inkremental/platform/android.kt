@@ -1,16 +1,16 @@
 package dev.inkremental.platform
 
-import dev.inkremental.*
-import android.view.View as AndroidView
-import android.view.ViewGroup as AndroidViewGroup
+import dev.inkremental.Inkremental
+import dev.inkremental.android.AndroidViewFactory
+import dev.inkremental.android.ReflectivePropertySetter
 
 internal actual fun platformInit() {
-    Inkremental.registerViewFactory(DefaultViewFactory())
+    Inkremental.registerViewFactory(AndroidViewFactory())
     Inkremental.registerAttributeSetter(ReflectivePropertySetter())
 }
 
-actual typealias View = AndroidView
-actual typealias ViewGroup = AndroidViewGroup
+actual typealias View = android.view.View
+actual typealias ViewGroup = android.view.ViewGroup
 
 actual val ViewGroup.childrenCount: Int
     get() = this.childCount

@@ -1,9 +1,10 @@
-package dev.inkremental
+package dev.inkremental.dsl.android
 
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.FrameLayout
+import dev.inkremental.Inkremental
 import dev.inkremental.Inkremental.Mount
 
 abstract class RenderableAdapter : BaseAdapter() {
@@ -43,8 +44,8 @@ abstract class RenderableAdapter : BaseAdapter() {
                     return items[pos]
                 }
 
-                override fun view(pos: Int) {
-                    r(pos, getItem(pos))
+                override fun view(index: Int) {
+                    r(index, getItem(index))
                 }
             }
         }

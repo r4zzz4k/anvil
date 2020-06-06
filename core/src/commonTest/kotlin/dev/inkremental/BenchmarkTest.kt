@@ -1,7 +1,5 @@
 package dev.inkremental
 
-import dev.inkremental.dsl.android.view.ViewScope
-import dev.inkremental.dsl.android.widget.FrameLayoutScope
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.time.measureTime

@@ -1,7 +1,8 @@
-package dev.inkremental
+package dev.inkremental.android
 
 import android.content.Context
 import android.widget.FrameLayout
+import dev.inkremental.Inkremental
 
 // TODO: add method children() to render all child renderables
 // TODO: add method children(r) to override certain properties in child renderables
@@ -12,7 +13,7 @@ abstract class RenderableView(context: Context) : FrameLayout(context) {
 
     public override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        Inkremental.mount(this, renderable )
+        Inkremental.mount(this, renderable)
     }
 
     public override fun onDetachedFromWindow() {

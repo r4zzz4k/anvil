@@ -7,13 +7,12 @@ import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.VERTICAL_GUIDELINE
 import androidx.core.view.ViewCompat
+import dev.inkremental.android.Size.*
+import dev.inkremental.android.renderableContentView
 import dev.inkremental.dsl.android.*
-import dev.inkremental.dsl.android.Size.MATCH
-import dev.inkremental.dsl.android.Size.WRAP
 import dev.inkremental.dsl.android.widget.button
 import dev.inkremental.dsl.android.widget.textView
 import dev.inkremental.dsl.androidx.constraintlayout.widget.*
-import dev.inkremental.renderableContentView
 
 class ConstraintActivity : AppCompatActivity() {
 

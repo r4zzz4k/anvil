@@ -11,9 +11,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
-import dev.inkremental.*
-import dev.inkremental.dsl.android.Dip
-import dev.inkremental.dsl.android.Sp
+import dev.inkremental.Inkremental
+import dev.inkremental.android.*
+import dev.inkremental.attr
 import dev.inkremental.dsl.androidx.appcompat.widget.AppCompatTextViewScope
 import dev.inkremental.dsl.androidx.appcompat.widget.ToolbarScope
 

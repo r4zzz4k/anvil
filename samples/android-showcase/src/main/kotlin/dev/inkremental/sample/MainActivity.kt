@@ -8,11 +8,10 @@ import android.os.Bundle
 import android.view.Gravity
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import dev.inkremental.android.Size.*
+import dev.inkremental.android.renderableContentView
 import dev.inkremental.dsl.android.*
-import dev.inkremental.dsl.android.Size.MATCH
-import dev.inkremental.dsl.android.Size.WRAP
 import dev.inkremental.dsl.android.widget.*
-import dev.inkremental.renderableContentView
 
 class MainActivity : AppCompatActivity() {
 

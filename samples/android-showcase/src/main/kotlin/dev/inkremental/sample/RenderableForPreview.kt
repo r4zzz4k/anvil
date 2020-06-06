@@ -1,9 +1,11 @@
 package dev.inkremental.sample
 
 import android.content.Context
-import dev.inkremental.RenderableView
+import dev.inkremental.android.CENTER
+import dev.inkremental.android.RenderableView
+import dev.inkremental.android.Size.MATCH
+import dev.inkremental.android.Size.WRAP
 import dev.inkremental.dsl.android.*
-import dev.inkremental.dsl.android.Size.*
 import dev.inkremental.dsl.android.widget.frameLayout
 import dev.inkremental.dsl.android.widget.textView
 

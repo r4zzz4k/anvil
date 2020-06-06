@@ -22,6 +22,7 @@ kotlin {
         named("androidMain") {
             dependencies {
                 api(kotlin("stdlib-jdk7"))
+                api("androidx.annotation:annotation:1.1.0")
             }
         }
         named("androidTest") {
