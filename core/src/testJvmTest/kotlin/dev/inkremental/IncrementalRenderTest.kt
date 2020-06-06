@@ -1,6 +1,8 @@
 package dev.inkremental
 
-import kotlin.test.*
+import dev.inkremental.platform.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class IncrementalRenderTest: Utils() {
     private var fooValue = "a"
@@ -8,17 +10,17 @@ class IncrementalRenderTest: Utils() {
 
     @Test
     fun testConstantsRenderedOnce() {
-        Inkremental.mount(container) { v<MockLayout> { attr("text", "bar") } }
-        assertEquals(1, createdViews[MockLayout::class.java])
+        Inkremental.mount(container) { v<FakeGroup> { attr("text", "bar") } }
+        assertEquals(1, createdViews[FakeGroup::class])
         assertEquals(1, changedAttrs["text"])
         Inkremental.render()
-        assertEquals(1, createdViews[MockLayout::class.java])
+        assertEquals(1, createdViews[FakeGroup::class])
         assertEquals(1, changedAttrs["text"])
     }
 
     @Test
     fun testDynamicAttributeRenderedLazily() {
-        Inkremental.mount(container) { v<MockLayout> { attr("text", fooValue) } }
+        Inkremental.mount(container) { v<FakeGroup> { attr("text", fooValue) } }
         assertEquals(1, changedAttrs["text"])
         Inkremental.render()
         assertEquals(1, changedAttrs["text"])
@@ -32,30 +34,30 @@ class IncrementalRenderTest: Utils() {
     @Test
     fun testDynamicViewRenderedLazily() {
         Inkremental.mount(container) {
-            v<MockLayout> {
-                v<MockLayout>()
+            v<FakeGroup> {
+                v<FakeGroup>()
                 if(showView) {
-                    v<MockView>()
+                    v<View>()
                 }
             }
         }
-        val layout = container.getChildAt(0) as MockLayout
-        assertEquals(2, layout.childCount)
-        assertEquals(1, createdViews[MockView::class.java])
+        val layout = container.childAt(0) as ViewGroup
+        assertEquals(2, layout.childrenCount)
+        assertEquals(1, createdViews[View::class])
         Inkremental.render()
-        assertEquals(1, createdViews[MockView::class.java])
+        assertEquals(1, createdViews[View::class])
         showView = false
         Inkremental.render()
-        assertEquals(1, layout.getChildCount())
-        assertEquals(1, createdViews[MockView::class.java])
+        assertEquals(1, layout.childrenCount)
+        assertEquals(1, createdViews[View::class])
         Inkremental.render()
-        assertEquals(1, createdViews[MockView::class.java])
+        assertEquals(1, createdViews[View::class])
         showView = true
         Inkremental.render()
-        assertEquals(2, layout.getChildCount())
-        assertEquals(2, createdViews[MockView::class.java])
+        assertEquals(2, layout.childrenCount)
+        assertEquals(2, createdViews[View::class])
         Inkremental.render()
-        assertEquals(2, createdViews[MockView::class.java])
+        assertEquals(2, createdViews[View::class])
     }
 
     private var firstMountValue = "foo"
@@ -63,18 +65,18 @@ class IncrementalRenderTest: Utils() {
 
     @Test
     fun testRenderUpdatesAllMounts() {
-        val rootA = MockLayout(context)
-        val rootB = MockLayout(context)
+        val rootA = FakeGroup()
+        val rootB = FakeGroup()
         Inkremental.mount(rootA) { attr("text", firstMountValue) }
         Inkremental.mount(rootB) { attr("tag", secondMountValue) }
-        assertEquals("foo", rootA.text)
-        assertEquals("bar", rootB.tag)
+        assertEquals("foo", rootA["text"])
+        assertEquals("bar", rootB["tag"])
 
         firstMountValue = "baz"
         secondMountValue = "qux"
         Inkremental.render()
 
-        assertEquals("baz", rootA.text)
-        assertEquals("qux", rootB.tag)
+        assertEquals("baz", rootA["text"])
+        assertEquals("qux", rootB["tag"])
     }
 }

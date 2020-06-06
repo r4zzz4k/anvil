@@ -4,12 +4,8 @@ import android.content.Context
 import android.widget.FrameLayout
 import dev.inkremental.Inkremental
 
-// TODO: add method children() to render all child renderables
-// TODO: add method children(r) to override certain properties in child renderables
 abstract class RenderableView(context: Context) : FrameLayout(context) {
-
-    abstract val renderable : () -> Unit
-    open val removeChilds = true
+    abstract val renderable: () -> Unit
 
     public override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -18,6 +14,6 @@ abstract class RenderableView(context: Context) : FrameLayout(context) {
 
     public override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        Inkremental.unmount(this, removeChilds)
+        Inkremental.unmount(this)
     }
 }

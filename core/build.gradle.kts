@@ -5,6 +5,7 @@ plugins {
 
 kotlin {
     android()
+    jvm("testJvm") // TODO disable publication!
 
     sourceSets {
         commonMain {
@@ -26,6 +27,17 @@ kotlin {
             }
         }
         named("androidTest") {
+            dependencies {
+                implementation(kotlin("test-junit"))
+            }
+        }
+
+        named("testJvmMain") {
+            dependencies {
+                api(kotlin("reflect"))
+            }
+        }
+        named("testJvmTest") {
             dependencies {
                 implementation(kotlin("test-junit"))
             }
