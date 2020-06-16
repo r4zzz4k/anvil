@@ -20,7 +20,8 @@ jobs:
           ${{ runner.os }}-gems-
 
 #   - uses: helaili/jekyll-action@eb6eabe # v2.0.2
-    - uses: r4zzz4k/jekyll-action@751fccc
+#    - uses: r4zzz4k/jekyll-action@751fccc
+    - uses: r4zzz4k/jekyll-action@763ef99
       env:
         JEKYLL_PAT: ${{ secrets.JEKYLL_PAT }}
       with:
