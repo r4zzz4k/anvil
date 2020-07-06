@@ -13,6 +13,9 @@ internal fun Project.prop(key: String): String? =
 internal fun Project.envOrProp(key: String): String? =
     System.getenv(key).takeUnless(String::isNullOrEmpty) ?: prop(key)
 
+internal fun Project.reqProp(key: String): String =
+    findProperty(key)?.let { it as String } ?: error("Please specify $key property")
+
 internal fun Project.bintrayUri(
     organization: String,
     repository: String,
