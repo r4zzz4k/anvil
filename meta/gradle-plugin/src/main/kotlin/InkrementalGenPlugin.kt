@@ -105,6 +105,7 @@ fun moduleConfigurationName(module: String?) = buildCamelCaseString(module, CONF
 fun moduleDefConfigurationName(module: String?) = buildCamelCaseString(module, CONFIGURATION_MODULE_DEF)
 
 fun androidAarTaskName(name: String) = buildCamelCaseString("bundle", name, "ReleaseAar")
+fun androidComponentName(name: String) = buildCamelCaseString(name, "Release")
 
 fun loadPropertiesFromFile(file: File): Properties = Properties().apply {
     try {

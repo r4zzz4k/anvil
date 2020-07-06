@@ -32,11 +32,10 @@ subprojects {
         jcenter()
     }
 
-    val GROUP: String by project
-    val VERSION_NAME: String by project
+    group = project.property("inkremental.module.group")!!
+    version = project.property("inkremental.module.version")!!.toString() +
+            System.getenv("inkremental.module.version.suffix")?.let { "-$it" }
 
-    group = GROUP
-    version = VERSION_NAME
 }
 
 val mainSubprojects = listOf(

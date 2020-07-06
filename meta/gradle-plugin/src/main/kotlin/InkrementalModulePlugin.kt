@@ -1,15 +1,13 @@
 package dev.inkremental.meta.gradle
 
 import com.android.build.gradle.LibraryExtension
-import dev.inkremental.meta.model.InkrementalType
-import dev.inkremental.meta.model.buildCamelCaseString
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.component.SoftwareComponent
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.kotlin.dsl.*
-import kotlin.text.isNullOrEmpty
 
 class InkrementalModulePlugin : Plugin<Project> {
 
@@ -17,13 +15,13 @@ class InkrementalModulePlugin : Plugin<Project> {
         apply<InkrementalGenPlugin>()
         apply<MavenPublishPlugin>()
 
-        val compileSdk = 28
-        val minSdk = 17
-        val targetSdk = compileSdk
+        val minSdk = reqProp("inkremental.module.minsdk").toInt()
+        val targetSdk = reqProp("inkremental.module.targetsdk").toInt()
+        val compileSdk = reqProp("inkremental.module.compilesdk").toInt()
 
         val android = extensions.getByType<LibraryExtension>()
 
-        android.apply {
+        with(android) {
             compileSdkVersion(compileSdk)
 
             defaultConfig {
@@ -31,16 +29,19 @@ class InkrementalModulePlugin : Plugin<Project> {
                 targetSdkVersion(targetSdk)
             }
 
-            sourceSets.all { java.srcDirs("src/$name/kotlin") }
-
             lintOptions.isAbortOnError = false
             testOptions.unitTests.isReturnDefaultValues = true
         }
 
-        dependencies {
-            "api"("org.jetbrains.kotlin:kotlin-stdlib-jdk7")
-            "testImplementation"("org.jetbrains.kotlin:kotlin-test")
-            "testImplementation"("org.jetbrains.kotlin:kotlin-test-junit")
+        pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+            with(android) {
+                sourceSets.all { java.srcDirs("src/$name/kotlin") }
+            }
+            dependencies {
+                "api"("org.jetbrains.kotlin:kotlin-stdlib-jdk7")
+                "testImplementation"("org.jetbrains.kotlin:kotlin-test")
+                "testImplementation"("org.jetbrains.kotlin:kotlin-test-junit")
+            }
         }
 
         val bintrayUser = envOrProp("BINTRAY_USER")
@@ -52,9 +53,9 @@ class InkrementalModulePlugin : Plugin<Project> {
                     maven {
                         name = "Bintray"
                         url = bintrayUri(
-                            prop("BINTRAY_ORG")!!,
+                            reqProp("inkremental.module.bintray.organization"),
                             bintrayRepo!!,
-                            prop("POM_PACKAGE_NAME")!!,
+                            reqProp("inkremental.module.bintray.package"),
                             publish = true
                         )
                         credentials {
@@ -87,11 +88,11 @@ class InkrementalModulePlugin : Plugin<Project> {
 
         fun registerPublication(name: String, artifactId: String, verion: String) {
             logger.debug("registerPublication: $name")
-            registerAnvilPublication(
+            registerPublicationImpl(
                 name,
                 artifactId,
                 verion,
-                tasks.getByName(androidAarTaskName(name)), // TODO named?
+                components.getByName(androidComponentName(name)),
                 //tasks.getByName("generate${name}ReleaseJavadocJar"),
                 *configurations.getByName(moduleDefConfigurationName(name)).artifacts.toTypedArray()
             )
@@ -102,13 +103,13 @@ class InkrementalModulePlugin : Plugin<Project> {
         afterEvaluate {
             extension.modules.configureEach {
                 val pubVersion = (if (version.isNotEmpty()) "$version-" else "") + project.version.toString()
-                registerPublication(dslName, prop("POM_ARTIFACT_ID")!!, pubVersion)
+                registerPublication(dslName, reqProp("inkremental.module.pom.artifactid"), pubVersion)
             }
         }
     }
 }
 
-private fun Project.registerAnvilPublication(
+private fun Project.registerPublicationImpl(
     name: String,
     artifactId: String,
     version: String,
@@ -119,25 +120,31 @@ private fun Project.registerAnvilPublication(
             this.groupId = project.group.toString()
             this.artifactId = artifactId
             this.version = version
-            artifacts.forEach { artifact(it) }
+            artifacts.forEach {
+                if(it is SoftwareComponent) {
+                    from(it)
+                } else {
+                    artifact(it)
+                }
+            }
             fixPom(this)
         }
 
 private fun Project.fixPom(publication: MavenPublication) = publication.pom.apply {
     packaging = "aar"
-    description.set(prop("POM_DESCRIPTION"))
-    name.set(prop("POM_NAME"))
-    url.set(prop("POM_URL"))
+    description.set(prop("inkremental.module.pom.description"))
+    name.set(prop("inkremental.module.pom.name"))
+    url.set(prop("inkremental.module.pom.url"))
     scm {
-        url.set(prop("POM_SCM_URL"))
-        connection.set(prop("POM_SCM_CONNECTION"))
-        developerConnection.set(prop("POM_SCM_DEV_CONNECTION"))
+        url.set(prop("inkremental.module.pom.scm.url"))
+        connection.set(prop("inkremental.module.pom.scm.connection"))
+        developerConnection.set(prop("inkremental.module.pom.scm.dev.connection"))
     }
     licenses {
         license {
-            name.set(prop("POM_LICENCE_NAME"))
-            url.set(prop("POM_LICENCE_URL"))
-            distribution.set(prop("POM_LICENCE_DIST"))
+            name.set(prop("inkremental.module.pom.license.name"))
+            url.set(prop("inkremental.module.pom.license.url"))
+            distribution.set(prop("inkremental.module.pom.license.distribution"))
         }
     }
 }
