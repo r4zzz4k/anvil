@@ -10,8 +10,9 @@ internal fun <T: Any> NamedDomainObjectContainer<T>.maybeCreate(name: String, co
 internal fun Project.prop(key: String): String? =
     findProperty(key)?.let { it as String }
 
-internal fun Project.envOrProp(key: String): String? =
-    System.getenv(key).takeUnless(String::isNullOrEmpty) ?: prop(key)
+internal fun Project.env(key: String): String? = System.getenv(key).takeUnless(String::isNullOrEmpty)
+
+internal fun Project.envOrProp(key: String): String? = env(key) ?: prop(key)
 
 internal fun Project.reqProp(key: String): String =
     findProperty(key)?.let { it as String } ?: error("Please specify $key property")
