@@ -126,8 +126,8 @@ fun Project.setupAndroidSdkModule(
         null
     ) {
         javadocContains = "It contains views and their setters for Android SDK (API level $apiLevel)"
-        jarFiles = listOf(getAndroidJar(apiLevel))
-        nullabilitySourceFiles = listOf(getAndroidJar(28))
+        jarFiles = listOf(requireAndroidSdkJar(apiLevel.toString()))
+        nullabilitySourceFiles = listOf(requireAndroidSdkJar("28"))
     }
 }
 
@@ -149,7 +149,7 @@ fun Project.setupAndroidLibraryModule(
     ) {
         javadocContains = "It contains views and their setters for the library ${module.name}"
         configuration = genInputs
-        sdkDependencies = listOf(getAndroidJar(28))
+        sdkDependencies = listOf(requireAndroidSdkJar("28"))
     }
 }
 
@@ -247,19 +247,3 @@ private fun Project.createModuleInputsConfiguration(prefix: String? = null): Con
 
 private fun Project.getModelOutputFile(modelName: String) = buildDir / "inkremental" / "$modelName.json"
 private fun Project.getOutputDir(sourceSetName: String) = projectDir / "src" / "gen-$sourceSetName" / "kotlin"
-
-private fun Project.getAndroidJar(api: Int): File {
-    val localProperties = File(rootDir, "local.properties")
-    val sdkDir = loadPropertiesFromFile(localProperties).getProperty("sdk.dir")
-        ?: System.getenv("ANDROID_SDK_ROOT")
-        ?: System.getenv("ANDROID_HOME")
-        ?: error("Android SDK location is not defined. " +
-                "Please put SDK path to either local.properties file to property sdk.dir " +
-                "or pass it via ANDROID_SDK_ROOT environment variable.")
-    val jarFile = File("$sdkDir/platforms/android-$api/android.jar")
-    if(!jarFile.exists()) error("Jar file for SDK $api is not found at ${jarFile.absolutePath}. " +
-            "Please download platform $api via SDK manager or by invoking " +
-            "the following command from shell: " +
-            "sdkmanager \"platforms;android-$api\"")
-    return jarFile
-}

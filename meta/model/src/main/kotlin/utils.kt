@@ -21,7 +21,7 @@ fun buildCamelCaseString(vararg components: String?): String =
     }
 
 @Deprecated(
-    "Kotlin 1.3.70 would have it out of the box",
+    "Kotlin 1.3.70 would have it out of the box, we have to wait until Gradle uses 1.3.70",
     ReplaceWith("scan(initial, operation)", "kotlin.collections.scan")
 )
 public inline fun <T, R> Iterable<T>.scan(initial: R, operation: (acc: R, T) -> R): List<R> {
