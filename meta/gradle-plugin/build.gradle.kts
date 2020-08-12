@@ -22,6 +22,10 @@ dependencies {
 
 gradlePlugin {
     plugins {
+        register("lite-android") {
+            id = "dev.inkremental.lite-android"
+            implementationClass = "dev.inkremental.meta.gradle.InkrementalLiteAndroidPlugin"
+        }
         register("gen") {
             id = "dev.inkremental.gen"
             implementationClass = "dev.inkremental.meta.gradle.InkrementalGenPlugin"

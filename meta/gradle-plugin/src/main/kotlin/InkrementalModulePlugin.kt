@@ -8,6 +8,7 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.kotlin.dsl.*
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class InkrementalModulePlugin : Plugin<Project> {
 
@@ -41,6 +42,12 @@ class InkrementalModulePlugin : Plugin<Project> {
                 "api"("org.jetbrains.kotlin:kotlin-stdlib-jdk7")
                 "testImplementation"("org.jetbrains.kotlin:kotlin-test")
                 "testImplementation"("org.jetbrains.kotlin:kotlin-test-junit")
+            }
+        }
+        pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+            val kotlin = extensions.getByType<KotlinMultiplatformExtension>()
+            kotlin.android {
+                publishLibraryVariants("release")
             }
         }
 
