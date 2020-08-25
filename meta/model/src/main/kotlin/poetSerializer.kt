@@ -3,7 +3,8 @@ package dev.inkremental.meta.model
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import kotlinx.serialization.*
-import kotlinx.serialization.internal.SerialClassDescImpl
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.modules.SerialModule
 import kotlinx.serialization.modules.SerializersModule
 
@@ -19,22 +20,32 @@ val PoetModule: SerialModule = SerializersModule {
     }
 }
 
-val TypeNameSerializer: KSerializer<TypeName> = PolymorphicSerializer(TypeName::class)
+val TypeNameSerializer: KSerializer<TypeName>
+    get() {
+        val t = requireNotNull(TypeName::class)
+        val s = requireNotNull(PolymorphicSerializer(t))
+        return s
+    }
+        //by lazy { PolymorphicSerializer(TypeName::class) }
+
+private fun <T> SerialDescriptorBuilder.element(
+    elementName: String,
+    serializer: KSerializer<T>,
+    annotations: List<Annotation> = emptyList(),
+    isOptional: Boolean = false
+) = element(elementName, serializer.descriptor, annotations, isOptional)
 
 @Serializer(forClass = ClassName::class)
 object ClassNameSerializer: KSerializer<ClassName> {
-    override val descriptor: SerialDescriptor = object : SerialClassDescImpl("class") {
-        init {
-            addElement("canonicalName")
-            addElement("isNullable")
-        }
+    override val descriptor: SerialDescriptor = SerialDescriptor("class") {
+        element("canonicalName", String.serializer())
+        element("isNullable", Boolean.serializer(), isOptional = true)
     }
 
-    override fun serialize(encoder: Encoder, obj: ClassName) {
-        encoder.beginStructure(descriptor).let { composite ->
-            composite.encodeStringElement(descriptor, 0, obj.canonicalName)
-            composite.encodeBooleanElement(descriptor, 1, obj.isNullable)
-            composite.endStructure(descriptor)
+    override fun serialize(encoder: Encoder, value: ClassName) {
+        encoder.encodeStructure(descriptor) {
+            encodeStringElement(descriptor, 0, value.canonicalName)
+            encodeBooleanElement(descriptor, 1, value.isNullable)
         }
     }
 
@@ -43,50 +54,49 @@ object ClassNameSerializer: KSerializer<ClassName> {
         var isNullable: Boolean? = null
         var annotations: List<AnnotationSpec> = emptyList()
 
-        val dec = decoder.beginStructure(descriptor)
-        loop@ while (true) {
-            when (val i = dec.decodeElementIndex(descriptor)) {
-                CompositeDecoder.READ_DONE -> break@loop
-                0 -> canonicalName = dec.decodeStringElement(descriptor, i)
-                1 -> isNullable = dec.decodeBooleanElement(descriptor, i)
-                else -> throw SerializationException("Unknown index $i")
+        decoder.decodeStructure(descriptor) {
+            loop@ while (true) {
+                when (val i = decodeElementIndex(descriptor)) {
+                    CompositeDecoder.READ_DONE -> break@loop
+                    0 -> canonicalName = decodeStringElement(descriptor, i)
+                    1 -> isNullable = decodeBooleanElement(descriptor, i)
+                    else -> throw SerializationException("Unknown index $i")
+                }
             }
         }
-        dec.endStructure(descriptor)
 
         canonicalName ?: throw MissingFieldException("canonicalName")
-        isNullable ?: throw MissingFieldException("isNullable")
-        return ClassName.bestGuess(canonicalName)
-            .copy(nullable = isNullable, annotations = annotations)
+        if (isNullable == null) isNullable = false
+        return ClassName.bestGuess(canonicalName!!)
+            .copy(nullable = isNullable!!, annotations = annotations)
     }
 }
 
 @Serializer(forClass = ParameterizedTypeName::class)
 object ParameterizedTypeNameSerializer: KSerializer<ParameterizedTypeName> {
-    override val descriptor: SerialDescriptor = object : SerialClassDescImpl("parameterized") {
-        init {
-            addElement("rawType")
-            addElement("typeArguments")
-            addElement("isNullable")
-        }
+    override val descriptor: SerialDescriptor = SerialDescriptor("parameterized") {
+        val s = requireNotNull(TypeNameSerializer)
+        val t = s.list
+        element("rawType", ClassNameSerializer)
+        element("typeArguments", t)
+        element("isNullable", Boolean.serializer(), isOptional = true)
     }
 
-    override fun serialize(encoder: Encoder, obj: ParameterizedTypeName) {
-        encoder.beginStructure(descriptor).let { composite ->
-            composite.encodeSerializableElement(
+    override fun serialize(encoder: Encoder, value: ParameterizedTypeName) {
+        encoder.encodeStructure(descriptor) {
+            encodeSerializableElement(
                 descriptor,
                 0,
                 ClassNameSerializer,
-                obj.rawType
+                value.rawType
             )
-            composite.encodeSerializableElement(
+            encodeSerializableElement(
                 descriptor,
                 1,
                 TypeNameSerializer.list,
-                obj.typeArguments
+                value.typeArguments
             )
-            composite.encodeBooleanElement(descriptor, 2, obj.isNullable)
-            composite.endStructure(descriptor)
+            encodeBooleanElement(descriptor, 2, value.isNullable)
         }
     }
 
@@ -96,83 +106,80 @@ object ParameterizedTypeNameSerializer: KSerializer<ParameterizedTypeName> {
         var isNullable: Boolean? = null
         var annotations: List<AnnotationSpec> = emptyList()
 
-        val dec = decoder.beginStructure(descriptor)
-        loop@ while (true) {
-            when (val i = dec.decodeElementIndex(descriptor)) {
-                CompositeDecoder.READ_DONE -> break@loop
-                0 -> rawType = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    ClassNameSerializer
-                )
-                1 -> typeArguments = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    TypeNameSerializer.list
-                )
-                2 -> isNullable = dec.decodeBooleanElement(descriptor, i)
-                else -> throw SerializationException("Unknown index $i")
+        decoder.decodeStructure(descriptor) {
+            loop@ while (true) {
+                when (val i = decodeElementIndex(descriptor)) {
+                    CompositeDecoder.READ_DONE -> break@loop
+                    0 -> rawType = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        ClassNameSerializer
+                    )
+                    1 -> typeArguments = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        TypeNameSerializer.list
+                    )
+                    2 -> isNullable = decodeBooleanElement(descriptor, i)
+                    else -> throw SerializationException("Unknown index $i")
+                }
             }
         }
-        dec.endStructure(descriptor)
 
         rawType ?: throw MissingFieldException("rawType")
         typeArguments ?: throw MissingFieldException("typeArguments")
-        isNullable ?: throw MissingFieldException("isNullable")
-        return rawType.parameterizedBy(*typeArguments.toTypedArray())
-            .copy(nullable = isNullable, annotations = annotations)
+        if (isNullable == null) isNullable = false
+        return rawType!!.parameterizedBy(*typeArguments!!.toTypedArray())
+            .copy(nullable = isNullable!!, annotations = annotations)
     }
 }
 
 @Serializer(forClass = LambdaTypeName::class)
 object LambdaTypeNameSerializer: KSerializer<LambdaTypeName> {
-    override val descriptor: SerialDescriptor = object : SerialClassDescImpl("lambda") {
-        init {
-            addElement("receiver", isOptional = true)
-            addElement("parameters", isOptional = true)
-            addElement("returnType")
-            addElement("isNullable")
-            addElement("isSuspending")
-            //addElement("annotations", isOptional = true)
-            // TODO implement AnnotationSpecSerializer
-        }
+    override val descriptor: SerialDescriptor = SerialDescriptor("lambda") {
+        element("receiver", TypeNameSerializer, isOptional = true)
+        element("parameters", ParameterSpecSerializer.list, isOptional = true)
+        element("returnType", TypeNameSerializer)
+        element("isNullable", Boolean.serializer(), isOptional = true)
+        element("isSuspending", Boolean.serializer(), isOptional = true)
+        //addElement("annotations", isOptional = true)
+        // TODO implement AnnotationSpecSerializer
     }
 
-    override fun serialize(encoder: Encoder, obj: LambdaTypeName) {
-        encoder.beginStructure(descriptor).let { composite ->
-            obj.receiver?.let {
-                composite.encodeSerializableElement(
+    override fun serialize(encoder: Encoder, value: LambdaTypeName) {
+        encoder.encodeStructure(descriptor) {
+            value.receiver?.let {
+                encodeSerializableElement(
                     descriptor,
                     0,
                     TypeNameSerializer,
                     it
                 )
             }
-            if(obj.parameters.isNotEmpty()) {
-                composite.encodeSerializableElement(
+            if(value.parameters.isNotEmpty()) {
+                encodeSerializableElement(
                     descriptor,
                     1,
                     ParameterSpecSerializer.list,
-                    obj.parameters
+                    value.parameters
                 )
             }
-            composite.encodeSerializableElement(
+            encodeSerializableElement(
                 descriptor,
                 2,
                 TypeNameSerializer,
-                obj.returnType
+                value.returnType
             )
-            composite.encodeBooleanElement(
+            encodeBooleanElement(
                 descriptor,
                 3,
-                obj.isNullable
+                value.isNullable
             )
-            composite.encodeBooleanElement(
+            encodeBooleanElement(
                 descriptor,
                 4,
-                obj.isSuspending
+                value.isSuspending
             )
-            composite.endStructure(descriptor)
         }
     }
 
@@ -184,64 +191,61 @@ object LambdaTypeNameSerializer: KSerializer<LambdaTypeName> {
         var isSuspending: Boolean? = null
         var annotations: List<AnnotationSpec> = emptyList()
 
-        val dec = decoder.beginStructure(descriptor)
-        loop@ while (true) {
-            when (val i = dec.decodeElementIndex(descriptor)) {
-                CompositeDecoder.READ_DONE -> break@loop
-                0 -> receiver = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    TypeNameSerializer
-                )
-                1 -> parameters = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    ParameterSpecSerializer.list
-                )
-                2 -> returnType = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    TypeNameSerializer
-                )
-                3 -> isNullable = dec.decodeBooleanElement(descriptor, i)
-                4 -> isSuspending = dec.decodeBooleanElement(descriptor, i)
-                else -> throw SerializationException("Unknown index $i")
+        decoder.decodeStructure(descriptor) {
+            loop@ while (true) {
+                when (val i = decodeElementIndex(descriptor)) {
+                    CompositeDecoder.READ_DONE -> break@loop
+                    0 -> receiver = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        TypeNameSerializer
+                    )
+                    1 -> parameters = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        ParameterSpecSerializer.list
+                    )
+                    2 -> returnType = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        TypeNameSerializer
+                    )
+                    3 -> isNullable = decodeBooleanElement(descriptor, i)
+                    4 -> isSuspending = decodeBooleanElement(descriptor, i)
+                    else -> throw SerializationException("Unknown index $i")
+                }
             }
         }
-        dec.endStructure(descriptor)
 
         returnType ?: throw MissingFieldException("returnType")
-        isNullable ?: throw MissingFieldException("isNullable")
-        isSuspending ?: throw MissingFieldException("isSuspending")
+        if (isNullable == null) isNullable = false
+        if (isSuspending == null) isSuspending = false
         return LambdaTypeName
-            .get(receiver, parameters, returnType)
-            .copy(isNullable, annotations, isSuspending)
+            .get(receiver, parameters, returnType!!)
+            .copy(isNullable!!, annotations, isSuspending!!)
     }
 }
 
 @Serializer(forClass = ParameterSpec::class)
 object ParameterSpecSerializer: KSerializer<ParameterSpec> {
-    override val descriptor: SerialDescriptor = object : SerialClassDescImpl("parameter") {
-        init {
-            addElement("name")
-            addElement("type")
-        }
+    override val descriptor: SerialDescriptor = SerialDescriptor("parameter") {
+        element("name", String.serializer())
+        element("type", TypeNameSerializer)
     }
 
-    override fun serialize(encoder: Encoder, obj: ParameterSpec) {
-        encoder.beginStructure(descriptor).let { composite ->
-            composite.encodeStringElement(
+    override fun serialize(encoder: Encoder, value: ParameterSpec) {
+        encoder.encodeStructure(descriptor) {
+            encodeStringElement(
                 descriptor,
                 0,
-                obj.name
+                value.name
             )
-            composite.encodeSerializableElement(
+            encodeSerializableElement(
                 descriptor,
                 1,
                 TypeNameSerializer,
-                obj.type
+                value.type
             )
-            composite.endStructure(descriptor)
         }
     }
 
@@ -249,74 +253,71 @@ object ParameterSpecSerializer: KSerializer<ParameterSpec> {
         var name: String? = null
         var type: TypeName? = null
 
-        val dec = decoder.beginStructure(descriptor)
-        loop@ while (true) {
-            when (val i = dec.decodeElementIndex(descriptor)) {
-                CompositeDecoder.READ_DONE -> break@loop
-                0 -> name = dec.decodeStringElement(descriptor, i)
-                1 -> type = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    TypeNameSerializer
-                )
-                else -> throw SerializationException("Unknown index $i")
+        decoder.decodeStructure(descriptor) {
+            loop@ while (true) {
+                when (val i = decodeElementIndex(descriptor)) {
+                    CompositeDecoder.READ_DONE -> break@loop
+                    0 -> name = decodeStringElement(descriptor, i)
+                    1 -> type = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        TypeNameSerializer
+                    )
+                    else -> throw SerializationException("Unknown index $i")
+                }
             }
         }
-        dec.endStructure(descriptor)
 
         name ?: throw MissingFieldException("name")
         type ?: throw MissingFieldException("type")
-        return ParameterSpec.builder(name, type).build()
+        return ParameterSpec.builder(name!!, type!!).build()
     }
 }
 
 @Serializer(forClass = TypeVariableName::class)
 object TypeVariableNameSerializer: KSerializer<TypeVariableName> {
-    override val descriptor: SerialDescriptor = object : SerialClassDescImpl("typeVar") {
-        init {
-            addElement("name")
-            addElement("bounds", isOptional = true)
-            addElement("variance", isOptional = true)
-            addElement("isReified")
-            addElement("isNullable")
-            //addElement("annotations", isOptional = true)
-            // TODO implement AnnotationSpecSerializer
-        }
+    override val descriptor: SerialDescriptor = SerialDescriptor("typeVar") {
+        element("name", String.serializer())
+        element("bounds", TypeNameSerializer.list, isOptional = true)
+        element("variance", String.serializer(), isOptional = true)
+        element("isReified", Boolean.serializer())
+        element("isNullable", Boolean.serializer(), isOptional = true)
+        //addElement("annotations", isOptional = true)
+        // TODO implement AnnotationSpecSerializer
     }
 
-    override fun serialize(encoder: Encoder, obj: TypeVariableName) {
-        encoder.beginStructure(descriptor).let { composite ->
-            composite.encodeStringElement(
+    override fun serialize(encoder: Encoder, value: TypeVariableName) {
+        encoder.encodeStructure(descriptor) {
+            encodeStringElement(
                 descriptor,
                 0,
-                obj.name
+                value.name
             )
-            if(obj.bounds.isNotEmpty()) {
-                composite.encodeSerializableElement(
+            if(value.bounds.isNotEmpty()) {
+                encodeSerializableElement(
                     descriptor,
                     1,
                     TypeNameSerializer.list,
-                    obj.bounds
+                    value.bounds
                 )
             }
-            obj.variance?.let {
-                composite.encodeStringElement(
+            value.variance?.let {
+                encodeStringElement(
                     descriptor,
                     2,
                     it.name
                 )
             }
-            composite.encodeBooleanElement(
+            encodeBooleanElement(
                 descriptor,
                 3,
-                obj.isReified
+                value.isReified
             )
-            composite.encodeBooleanElement(
+            encodeBooleanElement(
                 descriptor,
                 4,
-                obj.isNullable
+                value.isNullable
             )
-            composite.endStructure(descriptor)
         }
     }
 
@@ -330,68 +331,67 @@ object TypeVariableNameSerializer: KSerializer<TypeVariableName> {
         var isNullable: Boolean? = null
         var annotations: List<AnnotationSpec> = emptyList()
 
-        val dec = decoder.beginStructure(descriptor)
-        loop@ while (true) {
-            when (val i = dec.decodeElementIndex(descriptor)) {
-                CompositeDecoder.READ_DONE -> break@loop
-                0 -> name = dec.decodeStringElement(descriptor, i)
-                1 -> bounds = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    TypeNameSerializer.list
-                )
-                2 -> variance = KModifier.valueOf(dec.decodeStringElement(descriptor, i))
-                3 -> isReified = dec.decodeBooleanElement(descriptor, i)
-                4 -> isNullable = dec.decodeBooleanElement(descriptor, i)
-                else -> throw SerializationException("Unknown index $i")
+        decoder.decodeStructure(descriptor) {
+            loop@ while (true) {
+                when (val i = decodeElementIndex(descriptor)) {
+                    CompositeDecoder.READ_DONE -> break@loop
+                    0 -> name = decodeStringElement(descriptor, i)
+                    1 -> bounds = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        TypeNameSerializer.list
+                    )
+                    2 -> variance = KModifier.valueOf(decodeStringElement(descriptor, i))
+                    3 -> isReified = decodeBooleanElement(descriptor, i)
+                    4 -> isNullable = decodeBooleanElement(descriptor, i)
+                    else -> throw SerializationException("Unknown index $i")
+                }
             }
         }
-        dec.endStructure(descriptor)
 
         name ?: throw MissingFieldException("name")
         isReified ?: throw MissingFieldException("isReified")
-        isNullable ?: throw MissingFieldException("isNullable")
-        return TypeVariableName(name = name, bounds = *bounds.toTypedArray(), variance = variance)
-            .copy(isNullable, annotations, bounds, isReified)
+        if (isReified == null) isReified = false
+        if (isNullable == null) isNullable = false
+        return TypeVariableName(name = name!!, bounds = *bounds.toTypedArray(), variance = variance)
+            .copy(isNullable!!, annotations, bounds, isReified!!)
     }
 }
 
 @Serializer(forClass = WildcardTypeName::class)
 object WildcardTypeNameSerializer: KSerializer<WildcardTypeName> {
-    override val descriptor: SerialDescriptor = object : SerialClassDescImpl("wildcard") {
-        init {
-            addElement("outTypes", isOptional = true)
-            addElement("inTypes", isOptional = true)
-            addElement("isNullable")
-            //addElement("annotations", isOptional = true)
-            // TODO implement AnnotationSpecSerializer
-        }
+    override val descriptor: SerialDescriptor = SerialDescriptor("wildcard") {
+        element("outTypes", TypeNameSerializer.list, isOptional = true)
+        element("inTypes", TypeNameSerializer.list, isOptional = true)
+        element("isNullable", Boolean.serializer(), isOptional = true)
+        //addElement("annotations", isOptional = true)
+        // TODO implement AnnotationSpecSerializer
     }
 
-    override fun serialize(encoder: Encoder, obj: WildcardTypeName) {
-        encoder.beginStructure(descriptor).let { composite ->
-            if(obj.outTypes.isNotEmpty()) {
-                composite.encodeSerializableElement(
+    override fun serialize(encoder: Encoder, value: WildcardTypeName) {
+        encoder.encodeStructure(descriptor) {
+            if(value.outTypes.isNotEmpty()) {
+                encodeSerializableElement(
                     descriptor,
                     0,
                     TypeNameSerializer.list,
-                    obj.outTypes
+                    value.outTypes
                 )
             }
-            if(obj.inTypes.isNotEmpty()) {
-                composite.encodeSerializableElement(
+            if(value.inTypes.isNotEmpty()) {
+                encodeSerializableElement(
                     descriptor,
                     1,
                     TypeNameSerializer.list,
-                    obj.inTypes
+                    value.inTypes
                 )
             }
-            composite.encodeBooleanElement(
+            encodeBooleanElement(
                 descriptor,
                 2,
-                obj.isNullable
+                value.isNullable
             )
-            composite.endStructure(descriptor)
+            endStructure(descriptor)
         }
     }
 
@@ -401,64 +401,61 @@ object WildcardTypeNameSerializer: KSerializer<WildcardTypeName> {
         var isNullable: Boolean? = null
         var annotations: List<AnnotationSpec> = emptyList()
 
-        val dec = decoder.beginStructure(descriptor)
-        loop@ while (true) {
-            when (val i = dec.decodeElementIndex(descriptor)) {
-                CompositeDecoder.READ_DONE -> break@loop
-                0 -> outTypes = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    TypeNameSerializer.list
-                )
-                1 -> inTypes = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    TypeNameSerializer.list
-                )
-                2 -> isNullable = dec.decodeBooleanElement(descriptor, i)
-                else -> throw SerializationException("Unknown index $i")
+        decoder.decodeStructure(descriptor) {
+            loop@ while (true) {
+                when (val i = decodeElementIndex(descriptor)) {
+                    CompositeDecoder.READ_DONE -> break@loop
+                    0 -> outTypes = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        TypeNameSerializer.list
+                    )
+                    1 -> inTypes = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        TypeNameSerializer.list
+                    )
+                    2 -> isNullable = decodeBooleanElement(descriptor, i)
+                    else -> throw SerializationException("Unknown index $i")
+                }
             }
         }
-        dec.endStructure(descriptor)
 
-        isNullable ?: throw MissingFieldException("isNullable")
+        if (isNullable == null) isNullable = false
         return when {
             outTypes.size != 1 -> throw SerializationException("outTypes should have exactly one element")
             inTypes.isEmpty() -> WildcardTypeName.producerOf(outTypes[0])
             inTypes.size != 1 -> throw SerializationException("inTypes should have zero or one element")
             else -> WildcardTypeName.consumerOf(inTypes[0])
-        }.copy(isNullable, annotations)
+        }.copy(isNullable!!, annotations)
     }
 }
 
 @Serializer(forClass = MemberName::class)
 object MemberNameSerializer: KSerializer<MemberName> {
-    override val descriptor: SerialDescriptor = object : SerialClassDescImpl("member") {
-        init {
-            addElement("packageName", isOptional = true)
-            addElement("enclosingClassName", isOptional = true)
-            addElement("simpleName")
-        }
+    override val descriptor: SerialDescriptor = SerialDescriptor("member") {
+        element("packageName", String.serializer(), isOptional = true)
+        element("enclosingClassName", ClassNameSerializer, isOptional = true)
+        element("simpleName", String.serializer())
     }
 
-    override fun serialize(encoder: Encoder, obj: MemberName) {
-        encoder.beginStructure(descriptor).let { composite ->
-            if(obj.enclosingClassName != null && obj.packageName.isNotEmpty()) {
+    override fun serialize(encoder: Encoder, value: MemberName) {
+        encoder.encodeStructure(descriptor) {
+            if(value.enclosingClassName != null && value.packageName.isNotEmpty()) {
                 TODO("Both packageName and enclosingClassName are present")
             }
-            if(obj.packageName.isNotEmpty()) {
-                composite.encodeStringElement(descriptor, 0, obj.packageName)
+            if(value.packageName.isNotEmpty()) {
+                encodeStringElement(descriptor, 0, value.packageName)
             }
-            obj.enclosingClassName?.let {
-                composite.encodeSerializableElement(
+            value.enclosingClassName?.let {
+                encodeSerializableElement(
                     descriptor,
                     1,
                     ClassNameSerializer,
                     it
                 )
             }
-            composite.encodeStringElement(descriptor, 2, obj.simpleName)
-            composite.endStructure(descriptor)
+            encodeStringElement(descriptor, 2, value.simpleName)
         }
     }
 
@@ -467,26 +464,26 @@ object MemberNameSerializer: KSerializer<MemberName> {
         var enclosingClassName: ClassName? = null
         var simpleName: String? = null
 
-        val dec = decoder.beginStructure(descriptor)
-        loop@ while (true) {
-            when (val i = dec.decodeElementIndex(descriptor)) {
-                CompositeDecoder.READ_DONE -> break@loop
-                0 -> packageName = dec.decodeStringElement(descriptor, i)
-                1 -> enclosingClassName = dec.decodeSerializableElement(
-                    descriptor,
-                    i,
-                    ClassNameSerializer
-                )
-                2 -> simpleName = dec.decodeStringElement(descriptor, i)
-                else -> throw SerializationException("Unknown index $i")
+        decoder.decodeStructure(descriptor) {
+            loop@ while (true) {
+                when (val i = decodeElementIndex(descriptor)) {
+                    CompositeDecoder.READ_DONE -> break@loop
+                    0 -> packageName = decodeStringElement(descriptor, i)
+                    1 -> enclosingClassName = decodeSerializableElement(
+                        descriptor,
+                        i,
+                        ClassNameSerializer
+                    )
+                    2 -> simpleName = decodeStringElement(descriptor, i)
+                    else -> throw SerializationException("Unknown index $i")
+                }
             }
         }
-        dec.endStructure(descriptor)
 
         simpleName ?: throw MissingFieldException("simpleName")
         return when {
-            packageName != null -> MemberName(packageName, simpleName)
-            enclosingClassName != null -> MemberName(enclosingClassName, simpleName)
+            packageName != null -> MemberName(packageName!!, simpleName!!)
+            enclosingClassName != null -> MemberName(enclosingClassName!!, simpleName!!)
             else -> throw SerializationException("Either packageName or enclosingClassName should be present")
         }
     }

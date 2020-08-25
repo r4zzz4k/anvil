@@ -1,8 +1,9 @@
 import java.util.*
 
 plugins {
-    kotlin("jvm") version "1.3.61" apply false
-    kotlin("plugin.serialization") version "1.3.61" apply false
+    id("com.android.application") version "3.6.3" apply false
+    kotlin("jvm") version "1.3.72" apply false
+    kotlin("plugin.serialization") version "1.3.72" apply false
 }
 
 fun loadProperties(fileName: String) =
@@ -32,4 +33,8 @@ subprojects {
     group = project.property("inkremental.module.group")!!
     version = project.property("inkremental.module.version")!!.toString() +
             System.getenv("inkremental.module.version.suffix")?.let { "-$it" }
+}
+
+tasks.register("clean") {
+    dependsOn(subprojects.mapNotNull { it.tasks.findByName("clean") })
 }

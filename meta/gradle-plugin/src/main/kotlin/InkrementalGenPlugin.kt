@@ -8,7 +8,6 @@ import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE
 import org.gradle.api.component.SoftwareComponentFactory
 import org.gradle.api.internal.artifacts.ArtifactAttributes.ARTIFACT_FORMAT
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.*
 import java.io.File
 import java.util.*

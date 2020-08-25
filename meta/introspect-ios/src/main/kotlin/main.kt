@@ -8,9 +8,10 @@ import org.jetbrains.kotlin.konan.library.konanPlatformLibraryPath
 import org.jetbrains.kotlin.konan.library.lite.LiteKonanDistributionProvider
 import org.jetbrains.kotlin.konan.library.lite.LiteKonanLibraryFacade
 import org.jetbrains.kotlin.konan.target.buildDistribution
+import org.jetbrains.kotlin.library.KotlinLibrary
+import org.jetbrains.kotlin.library.KotlinLibrarySearchPathResolver
 import org.jetbrains.kotlin.library.impl.createKotlinLibrary
-import org.jetbrains.kotlin.library.resolver.impl.libraryResolver
-import org.jetbrains.kotlin.library.resolverByName
+import org.jetbrains.kotlin.konan.library.defaultResolver
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.descriptorUtil.*
 import org.jetbrains.kotlin.storage.LockBasedStorageManager
@@ -28,9 +29,10 @@ fun main() {
     println("klib: ${distribution.klib}")
 
     val logger = SimpleLogger()
-    val resolver = resolverByName(
+    val resolver = resolverByName( // defaultResolver
         emptyList(),
         distributionKlib = distribution.klib,
+        localKotlinDir = null,
         skipCurrentDir = true,
         logger = logger)
 

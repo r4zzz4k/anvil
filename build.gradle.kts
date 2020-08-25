@@ -38,6 +38,11 @@ subprojects {
 
 }
 
+tasks.register("clean") {
+    dependsOn(subprojects.mapNotNull { it.tasks.findByName("clean") })
+    dependsOn(gradle.includedBuild("meta").task(":clean"))
+}
+
 val mainSubprojects = listOf(
     "anvil",
     "anvil-appcompat-v7",
