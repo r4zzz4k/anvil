@@ -9,6 +9,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.CharSequence
 import kotlin.Int
@@ -17,6 +18,7 @@ import kotlin.Unit
 
 fun spinner(configure: SpinnerScope.() -> Unit = {}) = v<Spinner>(configure.bind(SpinnerScope))
 abstract class SpinnerScope : AbsSpinnerScope() {
+  override fun init(arg: (Spinner) -> Unit): Unit = initWith<Spinner>(arg)
   fun dropDownHorizontalOffset(arg: Int): Unit = attr("dropDownHorizontalOffset", arg)
   fun dropDownVerticalOffset(arg: Int): Unit = attr("dropDownVerticalOffset", arg)
   fun dropDownWidth(arg: Int): Unit = attr("dropDownWidth", arg)

@@ -9,6 +9,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Int
 import kotlin.Suppress
@@ -17,6 +18,7 @@ import kotlin.Unit
 fun dialerFilter(configure: DialerFilterScope.() -> Unit = {}) =
     v<DialerFilter>(configure.bind(DialerFilterScope))
 abstract class DialerFilterScope : RelativeLayoutScope() {
+  override fun init(arg: (DialerFilter) -> Unit): Unit = initWith<DialerFilter>(arg)
   fun digitsWatcher(arg: TextWatcher): Unit = attr("digitsWatcher", arg)
   fun filterWatcher(arg: TextWatcher): Unit = attr("filterWatcher", arg)
   fun lettersWatcher(arg: TextWatcher): Unit = attr("lettersWatcher", arg)

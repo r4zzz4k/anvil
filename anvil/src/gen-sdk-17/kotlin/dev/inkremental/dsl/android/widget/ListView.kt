@@ -9,6 +9,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Int
@@ -17,6 +18,7 @@ import kotlin.Unit
 
 fun listView(configure: ListViewScope.() -> Unit = {}) = v<ListView>(configure.bind(ListViewScope))
 abstract class ListViewScope : AbsListViewScope() {
+  override fun init(arg: (ListView) -> Unit): Unit = initWith<ListView>(arg)
   fun divider(arg: Drawable?): Unit = attr("divider", arg)
   fun dividerHeight(arg: Int): Unit = attr("dividerHeight", arg)
   fun footerDividersEnabled(arg: Boolean): Unit = attr("footerDividersEnabled", arg)

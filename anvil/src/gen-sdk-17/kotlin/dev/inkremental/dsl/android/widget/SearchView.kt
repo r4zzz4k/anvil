@@ -11,6 +11,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.CharSequence
@@ -21,6 +22,7 @@ import kotlin.Unit
 fun searchView(configure: SearchViewScope.() -> Unit = {}) =
     v<SearchView>(configure.bind(SearchViewScope))
 abstract class SearchViewScope : LinearLayoutScope() {
+  override fun init(arg: (SearchView) -> Unit): Unit = initWith<SearchView>(arg)
   fun iconified(arg: Boolean): Unit = attr("iconified", arg)
   fun iconifiedByDefault(arg: Boolean): Unit = attr("iconifiedByDefault", arg)
   fun imeOptions(arg: Int): Unit = attr("imeOptions", arg)

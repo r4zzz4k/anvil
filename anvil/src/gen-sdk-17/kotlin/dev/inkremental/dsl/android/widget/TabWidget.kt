@@ -9,6 +9,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Int
@@ -18,6 +19,7 @@ import kotlin.Unit
 fun tabWidget(configure: TabWidgetScope.() -> Unit = {}) =
     v<TabWidget>(configure.bind(TabWidgetScope))
 abstract class TabWidgetScope : LinearLayoutScope() {
+  override fun init(arg: (TabWidget) -> Unit): Unit = initWith<TabWidget>(arg)
   fun currentTab(arg: Int): Unit = attr("currentTab", arg)
   fun dividerDrawable(arg: Int): Unit = attr("dividerDrawable", arg)
   fun leftStripDrawable(arg: Drawable?): Unit = attr("leftStripDrawable", arg)

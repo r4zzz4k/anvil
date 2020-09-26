@@ -10,6 +10,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -20,6 +21,7 @@ import kotlin.Unit
 fun keyboardView(configure: KeyboardViewScope.() -> Unit = {}) =
     v<KeyboardView>(configure.bind(KeyboardViewScope))
 abstract class KeyboardViewScope : ViewScope() {
+  override fun init(arg: (KeyboardView) -> Unit): Unit = initWith<KeyboardView>(arg)
   fun keyboard(arg: Keyboard): Unit = attr("keyboard", arg)
   fun onKeyboardAction(arg: KeyboardView.OnKeyboardActionListener?): Unit = attr("onKeyboardAction",
       arg)

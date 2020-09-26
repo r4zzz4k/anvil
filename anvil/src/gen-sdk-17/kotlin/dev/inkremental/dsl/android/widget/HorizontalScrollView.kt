@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Suppress
@@ -16,6 +17,7 @@ import kotlin.Unit
 fun horizontalScrollView(configure: HorizontalScrollViewScope.() -> Unit = {}) =
     v<HorizontalScrollView>(configure.bind(HorizontalScrollViewScope))
 abstract class HorizontalScrollViewScope : FrameLayoutScope() {
+  override fun init(arg: (HorizontalScrollView) -> Unit): Unit = initWith<HorizontalScrollView>(arg)
   fun fillViewport(arg: Boolean): Unit = attr("fillViewport", arg)
   fun smoothScrollingEnabled(arg: Boolean): Unit = attr("smoothScrollingEnabled", arg)
   companion object : HorizontalScrollViewScope() {

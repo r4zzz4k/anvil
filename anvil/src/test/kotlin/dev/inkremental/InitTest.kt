@@ -1,7 +1,7 @@
 package dev.inkremental
 
 import android.view.View
-import dev.inkremental.dsl.android.init
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewScope
 import kotlin.test.*
 
@@ -14,7 +14,7 @@ class InitTest : Utils() {
         println("============================")
         Inkremental.mount(container) {
             //init(makeFunc("once"))
-            v<MockView, ViewScope>(ViewScope) { init(makeFunc("setUpView")) }
+            v<MockView, ViewScope>(ViewScope) { initWith(makeFunc("setUpView")) }
         }
         println("============================")
         //assertTrue(called["once"]!!)

@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Float
@@ -18,6 +19,7 @@ import kotlin.Unit
 fun ratingBar(configure: RatingBarScope.() -> Unit = {}) =
     v<RatingBar>(configure.bind(RatingBarScope))
 abstract class RatingBarScope : AbsSeekBarScope() {
+  override fun init(arg: (RatingBar) -> Unit): Unit = initWith<RatingBar>(arg)
   fun isIndicator(arg: Boolean): Unit = attr("isIndicator", arg)
   fun numStars(arg: Int): Unit = attr("numStars", arg)
   fun onRatingBarChange(arg: ((

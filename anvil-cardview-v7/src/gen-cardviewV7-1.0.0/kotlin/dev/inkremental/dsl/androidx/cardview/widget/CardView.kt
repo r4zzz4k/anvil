@@ -8,6 +8,7 @@ import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.Dip
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.widget.FrameLayoutScope
 import dev.inkremental.dsl.androidx.cardview.CardviewV7Setter
 import dev.inkremental.v
@@ -18,6 +19,7 @@ import kotlin.Unit
 
 fun cardView(configure: CardViewScope.() -> Unit = {}) = v<CardView>(configure.bind(CardViewScope))
 abstract class CardViewScope : FrameLayoutScope() {
+  fun init(arg: (CardView) -> Unit): Unit = initWith(arg)
   fun cardBackgroundColor(arg: ColorStateList?): Unit = attr("cardBackgroundColor", arg)
   fun cardBackgroundColor(arg: Int): Unit = attr("cardBackgroundColor", arg)
   fun cardElevation(arg: Dip): Unit = attr("cardElevation", arg.value)

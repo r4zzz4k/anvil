@@ -10,6 +10,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Int
 import kotlin.Suppress
@@ -18,6 +19,7 @@ import kotlin.Unit
 fun imageSwitcher(configure: ImageSwitcherScope.() -> Unit = {}) =
     v<ImageSwitcher>(configure.bind(ImageSwitcherScope))
 abstract class ImageSwitcherScope : ViewSwitcherScope() {
+  override fun init(arg: (ImageSwitcher) -> Unit): Unit = initWith<ImageSwitcher>(arg)
   fun imageDrawable(arg: Drawable): Unit = attr("imageDrawable", arg)
   fun imageResource(arg: Int): Unit = attr("imageResource", arg)
   fun imageURI(arg: Uri): Unit = attr("imageURI", arg)

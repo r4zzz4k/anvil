@@ -8,6 +8,7 @@ import androidx.appcompat.widget.ActionBarOverlayLayout
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.dsl.androidx.appcompat.AppcompatV7Setter
 import dev.inkremental.dsl.androidx.appcompat.CustomAppCompatv7Setter
@@ -17,10 +18,13 @@ import kotlin.CharSequence
 import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun actionBarOverlayLayout(configure: ActionBarOverlayLayoutScope.() -> Unit = {}) =
     v<ActionBarOverlayLayout>(configure.bind(ActionBarOverlayLayoutScope))
 abstract class ActionBarOverlayLayoutScope : ViewGroupScope() {
+  @JvmName("initActionBarOverlayLayout")
+  fun init(arg: (ActionBarOverlayLayout) -> Unit): Unit = initWith<ActionBarOverlayLayout>(arg)
   fun actionBarHideOffset(arg: Int): Unit = attr("actionBarHideOffset", arg)
   fun actionBarVisibilityCallback(arg: ActionBarOverlayLayout.ActionBarVisibilityCallback): Unit =
       attr("actionBarVisibilityCallback", arg)

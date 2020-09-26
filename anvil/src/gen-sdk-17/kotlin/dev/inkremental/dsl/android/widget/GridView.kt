@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Int
 import kotlin.Suppress
@@ -15,6 +16,7 @@ import kotlin.Unit
 
 fun gridView(configure: GridViewScope.() -> Unit = {}) = v<GridView>(configure.bind(GridViewScope))
 abstract class GridViewScope : AbsListViewScope() {
+  override fun init(arg: (GridView) -> Unit): Unit = initWith<GridView>(arg)
   fun columnWidth(arg: Int): Unit = attr("columnWidth", arg)
   fun gravity(arg: Int): Unit = attr("gravity", arg)
   fun horizontalSpacing(arg: Int): Unit = attr("horizontalSpacing", arg)

@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -18,6 +19,7 @@ import kotlin.Unit
 fun gridLayout(configure: GridLayoutScope.() -> Unit = {}) =
     v<GridLayout>(configure.bind(GridLayoutScope))
 abstract class GridLayoutScope : ViewGroupScope() {
+  override fun init(arg: (GridLayout) -> Unit): Unit = initWith<GridLayout>(arg)
   fun alignmentMode(arg: Int): Unit = attr("alignmentMode", arg)
   fun columnCount(arg: Int): Unit = attr("columnCount", arg)
   fun columnOrderPreserved(arg: Boolean): Unit = attr("columnOrderPreserved", arg)

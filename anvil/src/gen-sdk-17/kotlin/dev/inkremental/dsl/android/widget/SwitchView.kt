@@ -10,6 +10,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.CharSequence
 import kotlin.Int
@@ -19,6 +20,7 @@ import kotlin.Unit
 fun switchView(configure: SwitchViewScope.() -> Unit = {}) =
     v<Switch>(configure.bind(SwitchViewScope))
 abstract class SwitchViewScope : CompoundButtonScope() {
+  override fun init(arg: (Switch) -> Unit): Unit = initWith<Switch>(arg)
   fun switchPadding(arg: Int): Unit = attr("switchPadding", arg)
   fun switchTypeface(arg: Typeface): Unit = attr("switchTypeface", arg)
   fun textOff(arg: CharSequence): Unit = attr("textOff", arg)

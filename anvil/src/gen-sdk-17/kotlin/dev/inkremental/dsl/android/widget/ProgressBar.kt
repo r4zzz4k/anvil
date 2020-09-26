@@ -10,6 +10,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -20,6 +21,7 @@ import kotlin.Unit
 fun progressBar(configure: ProgressBarScope.() -> Unit = {}) =
     v<ProgressBar>(configure.bind(ProgressBarScope))
 abstract class ProgressBarScope : ViewScope() {
+  override fun init(arg: (ProgressBar) -> Unit): Unit = initWith<ProgressBar>(arg)
   fun indeterminate(arg: Boolean): Unit = attr("indeterminate", arg)
   fun indeterminateDrawable(arg: Drawable): Unit = attr("indeterminateDrawable", arg)
   fun interpolator(arg: Interpolator): Unit = attr("interpolator", arg)

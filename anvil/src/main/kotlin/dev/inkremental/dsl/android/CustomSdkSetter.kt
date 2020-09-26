@@ -52,7 +52,7 @@ inline class Px(val value: Int)
 
 inline class ColorState(@ColorRes val value : Int)
 
-fun ViewScope.init(action: (View) -> Unit) = attr(INIT_LITERAL, action)
+fun <T : View> ViewScope<View>.initWith(action: (T) -> Unit) = attr(INIT_LITERAL, action)
 fun ViewScope.size(w: Size, h: Size) = attr("size", w to h)
 fun ViewScope.tag(key: Int, value: Any?) = attr("tag", key to value)
 

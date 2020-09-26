@@ -77,7 +77,12 @@ fun withId(@IdRes id: Int, r: () -> Unit): View {
 val isPortrait: Boolean
     get() = r.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
-abstract class RootViewScope {
+@DslMarker annotation class InkrementalMarker
+
+@InkrementalMarker
+abstract class RootViewScope<V : View> {
+
+    abstract fun init(action: (V) -> Unit)
 
     val Int.dp : Dip
         get() = Dip(this)

@@ -10,6 +10,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Suppress
@@ -18,6 +19,7 @@ import kotlin.Unit
 fun textureView(configure: TextureViewScope.() -> Unit = {}) =
     v<TextureView>(configure.bind(TextureViewScope))
 abstract class TextureViewScope : ViewScope() {
+  override fun init(arg: (TextureView) -> Unit): Unit = initWith<TextureView>(arg)
   fun opaque(arg: Boolean): Unit = attr("opaque", arg)
   fun surfaceTexture(arg: SurfaceTexture): Unit = attr("surfaceTexture", arg)
   fun surfaceTextureListener(arg: TextureView.SurfaceTextureListener): Unit =

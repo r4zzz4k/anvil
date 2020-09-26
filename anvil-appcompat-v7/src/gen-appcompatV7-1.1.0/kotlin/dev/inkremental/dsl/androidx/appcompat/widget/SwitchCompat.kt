@@ -10,6 +10,7 @@ import androidx.appcompat.widget.SwitchCompat
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.widget.CompoundButtonScope
 import dev.inkremental.dsl.androidx.appcompat.AppcompatV7Setter
 import dev.inkremental.dsl.androidx.appcompat.CustomAppCompatv7Setter
@@ -19,10 +20,13 @@ import kotlin.CharSequence
 import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun switchCompat(configure: SwitchCompatScope.() -> Unit = {}) =
     v<SwitchCompat>(configure.bind(SwitchCompatScope))
 abstract class SwitchCompatScope : CompoundButtonScope() {
+  @JvmName("initSwitchCompat")
+  fun init(arg: (SwitchCompat) -> Unit): Unit = initWith<SwitchCompat>(arg)
   fun showText(arg: Boolean): Unit = attr("showText", arg)
   fun splitTrack(arg: Boolean): Unit = attr("splitTrack", arg)
   fun switchMinWidth(arg: Int): Unit = attr("switchMinWidth", arg)

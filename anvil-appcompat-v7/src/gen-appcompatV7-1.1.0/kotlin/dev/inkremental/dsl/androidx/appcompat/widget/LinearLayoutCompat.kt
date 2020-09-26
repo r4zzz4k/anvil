@@ -7,6 +7,7 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.dsl.androidx.appcompat.AppcompatV7Setter
 import dev.inkremental.dsl.androidx.appcompat.CustomAppCompatv7Setter
@@ -16,10 +17,13 @@ import kotlin.Float
 import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun linearLayoutCompat(configure: LinearLayoutCompatScope.() -> Unit = {}) =
     v<LinearLayoutCompat>(configure.bind(LinearLayoutCompatScope))
 abstract class LinearLayoutCompatScope : ViewGroupScope() {
+  @JvmName("initLinearLayoutCompat")
+  fun init(arg: (LinearLayoutCompat) -> Unit): Unit = initWith<LinearLayoutCompat>(arg)
   fun baselineAligned(arg: Boolean): Unit = attr("baselineAligned", arg)
   fun baselineAlignedChildIndex(arg: Int): Unit = attr("baselineAlignedChildIndex", arg)
   fun dividerDrawable(arg: Drawable): Unit = attr("dividerDrawable", arg)

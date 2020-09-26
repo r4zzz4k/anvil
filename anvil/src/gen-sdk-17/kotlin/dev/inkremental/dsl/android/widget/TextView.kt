@@ -21,6 +21,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewScope
 import dev.inkremental.v
 import java.util.Locale
@@ -35,6 +36,7 @@ import kotlin.Unit
 
 fun textView(configure: TextViewScope.() -> Unit = {}) = v<TextView>(configure.bind(TextViewScope))
 abstract class TextViewScope : ViewScope() {
+  override fun init(arg: (TextView) -> Unit): Unit = initWith<TextView>(arg)
   fun allCaps(arg: Boolean): Unit = attr("allCaps", arg)
   fun autoLinkMask(arg: Int): Unit = attr("autoLinkMask", arg)
   fun compoundDrawablePadding(arg: Int): Unit = attr("compoundDrawablePadding", arg)

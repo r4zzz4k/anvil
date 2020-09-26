@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.SurfaceViewScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -18,6 +19,7 @@ import kotlin.Unit
 fun gLSurfaceView(configure: GLSurfaceViewScope.() -> Unit = {}) =
     v<GLSurfaceView>(configure.bind(GLSurfaceViewScope))
 abstract class GLSurfaceViewScope : SurfaceViewScope() {
+  override fun init(arg: (GLSurfaceView) -> Unit): Unit = initWith<GLSurfaceView>(arg)
   fun debugFlags(arg: Int): Unit = attr("debugFlags", arg)
   fun eGLConfigChooser(arg: GLSurfaceView.EGLConfigChooser): Unit = attr("eGLConfigChooser", arg)
   fun eGLConfigChooser(arg: Boolean): Unit = attr("eGLConfigChooser", arg)

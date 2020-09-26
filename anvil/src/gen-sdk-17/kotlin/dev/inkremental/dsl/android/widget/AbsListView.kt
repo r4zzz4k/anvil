@@ -10,6 +10,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Float
@@ -21,6 +22,7 @@ import kotlin.Unit
 fun absListView(configure: AbsListViewScope.() -> Unit = {}) =
     v<AbsListView>(configure.bind(AbsListViewScope))
 abstract class AbsListViewScope : AdapterViewScope() {
+  override fun init(arg: (AbsListView) -> Unit): Unit = initWith<AbsListView>(arg)
   fun cacheColorHint(arg: Int): Unit = attr("cacheColorHint", arg)
   fun choiceMode(arg: Int): Unit = attr("choiceMode", arg)
   fun drawSelectorOnTop(arg: Boolean): Unit = attr("drawSelectorOnTop", arg)

@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Long
@@ -17,6 +18,7 @@ import kotlin.Unit
 fun datePicker(configure: DatePickerScope.() -> Unit = {}) =
     v<DatePicker>(configure.bind(DatePickerScope))
 abstract class DatePickerScope : FrameLayoutScope() {
+  override fun init(arg: (DatePicker) -> Unit): Unit = initWith<DatePicker>(arg)
   fun calendarViewShown(arg: Boolean): Unit = attr("calendarViewShown", arg)
   fun maxDate(arg: Long): Unit = attr("maxDate", arg)
   fun minDate(arg: Long): Unit = attr("minDate", arg)

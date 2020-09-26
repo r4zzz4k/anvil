@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Float
@@ -17,6 +18,7 @@ import kotlin.Unit
 
 fun gallery(configure: GalleryScope.() -> Unit = {}) = v<Gallery>(configure.bind(GalleryScope))
 abstract class GalleryScope : AbsSpinnerScope() {
+  override fun init(arg: (Gallery) -> Unit): Unit = initWith<Gallery>(arg)
   fun animationDuration(arg: Int): Unit = attr("animationDuration", arg)
   fun callbackDuringFling(arg: Boolean): Unit = attr("callbackDuringFling", arg)
   fun gravity(arg: Int): Unit = attr("gravity", arg)

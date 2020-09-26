@@ -9,6 +9,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.widget.FrameLayoutScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -21,6 +22,7 @@ import kotlin.Unit
 fun gestureOverlayView(configure: GestureOverlayViewScope.() -> Unit = {}) =
     v<GestureOverlayView>(configure.bind(GestureOverlayViewScope))
 abstract class GestureOverlayViewScope : FrameLayoutScope() {
+  override fun init(arg: (GestureOverlayView) -> Unit): Unit = initWith<GestureOverlayView>(arg)
   fun eventsInterceptionEnabled(arg: Boolean): Unit = attr("eventsInterceptionEnabled", arg)
   fun fadeEnabled(arg: Boolean): Unit = attr("fadeEnabled", arg)
   fun fadeOffset(arg: Long): Unit = attr("fadeOffset", arg)

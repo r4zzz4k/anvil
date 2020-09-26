@@ -11,6 +11,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.SurfaceViewScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -22,6 +23,7 @@ import kotlin.Unit
 fun videoView(configure: VideoViewScope.() -> Unit = {}) =
     v<VideoView>(configure.bind(VideoViewScope))
 abstract class VideoViewScope : SurfaceViewScope() {
+  override fun init(arg: (VideoView) -> Unit): Unit = initWith<VideoView>(arg)
   fun mediaController(arg: MediaController): Unit = attr("mediaController", arg)
   fun onCompletion(arg: ((arg0: MediaPlayer) -> Unit)?): Unit = attr("onCompletion", arg)
   fun onError(arg: ((

@@ -9,6 +9,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Int
@@ -18,6 +19,7 @@ import kotlin.Unit
 fun viewAnimator(configure: ViewAnimatorScope.() -> Unit = {}) =
     v<ViewAnimator>(configure.bind(ViewAnimatorScope))
 abstract class ViewAnimatorScope : FrameLayoutScope() {
+  override fun init(arg: (ViewAnimator) -> Unit): Unit = initWith<ViewAnimator>(arg)
   fun animateFirstView(arg: Boolean): Unit = attr("animateFirstView", arg)
   fun displayedChild(arg: Int): Unit = attr("displayedChild", arg)
   fun inAnimation(arg: Animation): Unit = attr("inAnimation", arg)

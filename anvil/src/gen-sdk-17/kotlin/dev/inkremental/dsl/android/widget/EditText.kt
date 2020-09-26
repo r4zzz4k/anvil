@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Int
 import kotlin.Suppress
@@ -15,6 +16,7 @@ import kotlin.Unit
 
 fun editText(configure: EditTextScope.() -> Unit = {}) = v<EditText>(configure.bind(EditTextScope))
 abstract class EditTextScope : TextViewScope() {
+  override fun init(arg: (EditText) -> Unit): Unit = initWith<EditText>(arg)
   fun selection(arg: Int): Unit = attr("selection", arg)
   companion object : EditTextScope() {
     init {

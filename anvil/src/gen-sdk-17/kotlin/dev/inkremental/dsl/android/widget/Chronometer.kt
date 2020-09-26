@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Long
 import kotlin.String
@@ -17,6 +18,7 @@ import kotlin.Unit
 fun chronometer(configure: ChronometerScope.() -> Unit = {}) =
     v<Chronometer>(configure.bind(ChronometerScope))
 abstract class ChronometerScope : TextViewScope() {
+  override fun init(arg: (Chronometer) -> Unit): Unit = initWith<Chronometer>(arg)
   fun base(arg: Long): Unit = attr("base", arg)
   fun format(arg: String): Unit = attr("format", arg)
   fun onChronometerTick(arg: ((arg0: Chronometer) -> Unit)?): Unit = attr("onChronometerTick", arg)

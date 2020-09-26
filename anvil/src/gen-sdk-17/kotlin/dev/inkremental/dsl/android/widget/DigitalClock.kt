@@ -7,6 +7,7 @@ import dev.inkremental.Inkremental
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Suppress
 import kotlin.Unit
@@ -14,6 +15,7 @@ import kotlin.Unit
 fun digitalClock(configure: DigitalClockScope.() -> Unit = {}) =
     v<DigitalClock>(configure.bind(DigitalClockScope))
 abstract class DigitalClockScope : TextViewScope() {
+  override fun init(arg: (DigitalClock) -> Unit): Unit = initWith<DigitalClock>(arg)
   companion object : DigitalClockScope() {
     init {
       Inkremental.registerAttributeSetter(SdkSetter)

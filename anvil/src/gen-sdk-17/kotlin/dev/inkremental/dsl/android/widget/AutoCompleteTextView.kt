@@ -11,6 +11,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.CharSequence
 import kotlin.Int
@@ -21,6 +22,7 @@ import kotlin.Unit
 fun autoCompleteTextView(configure: AutoCompleteTextViewScope.() -> Unit = {}) =
     v<AutoCompleteTextView>(configure.bind(AutoCompleteTextViewScope))
 abstract class AutoCompleteTextViewScope : EditTextScope() {
+  override fun init(arg: (AutoCompleteTextView) -> Unit): Unit = initWith<AutoCompleteTextView>(arg)
   fun completionHint(arg: CharSequence): Unit = attr("completionHint", arg)
   fun dropDownAnchor(arg: Int): Unit = attr("dropDownAnchor", arg)
   fun dropDownBackgroundDrawable(arg: Drawable): Unit = attr("dropDownBackgroundDrawable", arg)

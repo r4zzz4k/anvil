@@ -19,6 +19,7 @@ import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.Dip
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Any
 import kotlin.Boolean
@@ -28,8 +29,9 @@ import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
 
-fun view(configure: ViewScope.() -> Unit = {}) = v<View>(configure.bind(ViewScope))
-abstract class ViewScope : RootViewScope() {
+fun view(configure: ViewScope<View>.() -> Unit = {}) = v<View>(configure.bind(ViewScope))
+abstract class ViewScope<V : View> : RootViewScope<V>() {
+  override fun init(arg: (V) -> Unit): Unit = initWith<V>(arg)
   fun accessibilityDelegate(arg: View.AccessibilityDelegate?): Unit = attr("accessibilityDelegate",
       arg)
   fun activated(arg: Boolean): Unit = attr("activated", arg)
@@ -131,7 +133,7 @@ abstract class ViewScope : RootViewScope() {
   fun willNotDraw(arg: Boolean): Unit = attr("willNotDraw", arg)
   fun x(arg: Float): Unit = attr("x", arg)
   fun y(arg: Float): Unit = attr("y", arg)
-  companion object : ViewScope() {
+  companion object : ViewScope<View>() {
     init {
       Inkremental.registerAttributeSetter(SdkSetter)
       Inkremental.registerAttributeSetter(CustomSdkSetter)

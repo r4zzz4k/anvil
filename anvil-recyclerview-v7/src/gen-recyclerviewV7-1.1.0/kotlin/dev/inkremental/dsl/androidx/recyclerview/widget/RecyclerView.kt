@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.dsl.androidx.recyclerview.CustomRecyclerViewv7Setter
 import dev.inkremental.dsl.androidx.recyclerview.RecyclerviewV7Setter
@@ -15,10 +16,13 @@ import kotlin.Boolean
 import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun recyclerView(configure: RecyclerViewScope.() -> Unit = {}) =
     v<RecyclerView>(configure.bind(RecyclerViewScope))
 abstract class RecyclerViewScope : ViewGroupScope() {
+  @JvmName("initRecyclerView")
+  fun init(arg: (RecyclerView) -> Unit): Unit = initWith<RecyclerView>(arg)
   fun accessibilityDelegateCompat(arg: RecyclerViewAccessibilityDelegate?): Unit =
       attr("accessibilityDelegateCompat", arg)
   fun childDrawingOrderCallback(arg: RecyclerView.ChildDrawingOrderCallback?): Unit =

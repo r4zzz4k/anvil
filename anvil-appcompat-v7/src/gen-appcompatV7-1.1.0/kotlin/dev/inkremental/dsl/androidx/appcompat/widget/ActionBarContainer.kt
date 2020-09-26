@@ -8,6 +8,7 @@ import androidx.appcompat.widget.ScrollingTabContainerView
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.widget.FrameLayoutScope
 import dev.inkremental.dsl.androidx.appcompat.AppcompatV7Setter
 import dev.inkremental.dsl.androidx.appcompat.CustomAppCompatv7Setter
@@ -15,10 +16,13 @@ import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun actionBarContainer(configure: ActionBarContainerScope.() -> Unit = {}) =
     v<ActionBarContainer>(configure.bind(ActionBarContainerScope))
 abstract class ActionBarContainerScope : FrameLayoutScope() {
+  @JvmName("initActionBarContainer")
+  fun init(arg: (ActionBarContainer) -> Unit): Unit = initWith<ActionBarContainer>(arg)
   fun primaryBackground(arg: Drawable): Unit = attr("primaryBackground", arg)
   fun splitBackground(arg: Drawable): Unit = attr("splitBackground", arg)
   fun stackedBackground(arg: Drawable): Unit = attr("stackedBackground", arg)

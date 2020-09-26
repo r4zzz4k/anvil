@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.dsl.androidx.appcompat.AppcompatV7Setter
 import dev.inkremental.dsl.androidx.appcompat.CustomAppCompatv7Setter
@@ -19,9 +20,12 @@ import kotlin.CharSequence
 import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun toolbar(configure: ToolbarScope.() -> Unit = {}) = v<Toolbar>(configure.bind(ToolbarScope))
 abstract class ToolbarScope : ViewGroupScope() {
+  @JvmName("initToolbar")
+  fun init(arg: (Toolbar) -> Unit): Unit = initWith<Toolbar>(arg)
   fun collapseContentDescription(arg: CharSequence?): Unit = attr("collapseContentDescription", arg)
   fun collapseContentDescription(arg: Int): Unit = attr("collapseContentDescription", arg)
   fun collapseIcon(arg: Drawable?): Unit = attr("collapseIcon", arg)

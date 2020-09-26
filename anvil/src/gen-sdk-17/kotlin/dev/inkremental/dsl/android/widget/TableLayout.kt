@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Suppress
@@ -16,6 +17,7 @@ import kotlin.Unit
 fun tableLayout(configure: TableLayoutScope.() -> Unit = {}) =
     v<TableLayout>(configure.bind(TableLayoutScope))
 abstract class TableLayoutScope : LinearLayoutScope() {
+  override fun init(arg: (TableLayout) -> Unit): Unit = initWith<TableLayout>(arg)
   fun shrinkAllColumns(arg: Boolean): Unit = attr("shrinkAllColumns", arg)
   fun stretchAllColumns(arg: Boolean): Unit = attr("stretchAllColumns", arg)
   companion object : TableLayoutScope() {

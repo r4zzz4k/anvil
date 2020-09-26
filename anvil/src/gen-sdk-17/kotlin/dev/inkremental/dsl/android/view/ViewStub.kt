@@ -10,6 +10,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Int
 import kotlin.Suppress
@@ -17,6 +18,7 @@ import kotlin.Unit
 
 fun viewStub(configure: ViewStubScope.() -> Unit = {}) = v<ViewStub>(configure.bind(ViewStubScope))
 abstract class ViewStubScope : ViewScope() {
+  override fun init(arg: (ViewStub) -> Unit): Unit = initWith<ViewStub>(arg)
   fun inflatedId(arg: Int): Unit = attr("inflatedId", arg)
   fun layoutInflater(arg: LayoutInflater): Unit = attr("layoutInflater", arg)
   fun layoutResource(arg: Int): Unit = attr("layoutResource", arg)

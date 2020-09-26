@@ -5,7 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
-import android.widget.LinearLayout
+import android.widget.*
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -23,6 +23,8 @@ class BasicsActivity : AppCompatActivity() {
     // Our state that we want to render using Anvil
     var ticktock = 0
 
+    var tv: TextView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -39,6 +41,7 @@ class BasicsActivity : AppCompatActivity() {
                     orientation(LinearLayout.VERTICAL)
 
                     textView {
+                        init { tv = it }
                         size(MATCH, WRAP)
                         textSize(20f.sp)
                         text("Tick-tock: $ticktock")
@@ -66,6 +69,8 @@ class BasicsActivity : AppCompatActivity() {
                             // You can have more advanced logic here
                             onClick {
                                 ticktock = (ticktock - 1).coerceAtLeast(0)
+
+                                Toast.makeText(context, "Text: ${tv?.text}", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }

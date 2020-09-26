@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.dsl.androidx.core.CustomSupportV4Setter
 import dev.inkremental.dsl.androidx.core.SupportCoreUiSetter
@@ -14,10 +15,13 @@ import kotlin.Float
 import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun drawerLayout(configure: DrawerLayoutScope.() -> Unit = {}) =
     v<DrawerLayout>(configure.bind(DrawerLayoutScope))
 abstract class DrawerLayoutScope : ViewGroupScope() {
+  @JvmName("initDrawerLayout")
+  fun init(arg: (DrawerLayout) -> Unit): Unit = initWith<DrawerLayout>(arg)
   fun drawerElevation(arg: Float): Unit = attr("drawerElevation", arg)
   fun drawerLockMode(arg: Int): Unit = attr("drawerLockMode", arg)
   fun scrimColor(arg: Int): Unit = attr("scrimColor", arg)

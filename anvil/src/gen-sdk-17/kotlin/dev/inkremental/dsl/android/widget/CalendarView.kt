@@ -9,6 +9,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Int
@@ -19,6 +20,7 @@ import kotlin.Unit
 fun calendarView(configure: CalendarViewScope.() -> Unit = {}) =
     v<CalendarView>(configure.bind(CalendarViewScope))
 abstract class CalendarViewScope : FrameLayoutScope() {
+  override fun init(arg: (CalendarView) -> Unit): Unit = initWith<CalendarView>(arg)
   fun date(arg: Long): Unit = attr("date", arg)
   fun dateTextAppearance(arg: Int): Unit = attr("dateTextAppearance", arg)
   fun firstDayOfWeek(arg: Int): Unit = attr("firstDayOfWeek", arg)

@@ -91,11 +91,14 @@ abstract class GenerateDslTask : DefaultTask() {
         val attr = MemberName(PACKAGE, "attr")
         val bind = MemberName(PACKAGE, "bind")
         val v = MemberName(PACKAGE, "v")
+        val initWith = MemberName("$PACKAGE.dsl.android", "initWith")
 
         model.views.forEach { view ->
             val viewName = view.name
             val scopeType = view.scopeType
             val viewType = view.starProjectedType
+            val superType = view.superType
+            val isRoot = superType == null
 
             generateFile(scopeType.packageName, viewName) {
                 addFunction(viewName.decapitalize()) {
@@ -109,7 +112,7 @@ abstract class GenerateDslTask : DefaultTask() {
                 }
                 addClass(scopeType) {
                     addModifiers(KModifier.PUBLIC, KModifier.ABSTRACT)
-                    when (val superType = view.superType) {
+                    when (superType) {
                         null -> superclass(ClassName(PACKAGE, ROOT_VIEW_SCOPE))
                         is ViewModelSupertype.Resolved -> superclass(superType.type.scopeType)
                         is ViewModelSupertype.Unresolved -> error("View supertype should be resolved at this point")
@@ -122,6 +125,16 @@ abstract class GenerateDslTask : DefaultTask() {
                                 add("${INKREMENTAL.simpleName}.registerAttributeSetter(%M)\n", model.manualSetter)
                             }
                         }
+                    }
+                    addFunction("init") {
+                        addModifiers(KModifier.PUBLIC, if(isRoot) KModifier.OPEN else KModifier.OVERRIDE)
+                        addParameter("arg", LambdaTypeName.get(
+                            null,
+                            listOf(ParameterSpec.builder("", viewType).build()),
+                            UNIT
+                        ))
+                        returns(UNIT)
+                        addCode(CodeBlock.of("return %M<%T>(arg)", initWith, viewType))
                     }
                     view.attrs
                         .map { attrModel ->

@@ -13,6 +13,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -23,6 +24,7 @@ import kotlin.Unit
 fun imageView(configure: ImageViewScope.() -> Unit = {}) =
     v<ImageView>(configure.bind(ImageViewScope))
 abstract class ImageViewScope : ViewScope() {
+  override fun init(arg: (ImageView) -> Unit): Unit = initWith<ImageView>(arg)
   fun adjustViewBounds(arg: Boolean): Unit = attr("adjustViewBounds", arg)
   fun baseline(arg: Int): Unit = attr("baseline", arg)
   fun baselineAlignBottom(arg: Boolean): Unit = attr("baselineAlignBottom", arg)

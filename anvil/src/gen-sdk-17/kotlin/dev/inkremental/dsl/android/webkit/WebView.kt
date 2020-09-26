@@ -11,6 +11,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.widget.AbsoluteLayoutScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -20,6 +21,7 @@ import kotlin.Unit
 
 fun webView(configure: WebViewScope.() -> Unit = {}) = v<WebView>(configure.bind(WebViewScope))
 abstract class WebViewScope : AbsoluteLayoutScope() {
+  override fun init(arg: (WebView) -> Unit): Unit = initWith<WebView>(arg)
   fun downloadListener(arg: DownloadListener): Unit = attr("downloadListener", arg)
   fun findListener(arg: WebView.FindListener): Unit = attr("findListener", arg)
   fun horizontalScrollbarOverlay(arg: Boolean): Unit = attr("horizontalScrollbarOverlay", arg)

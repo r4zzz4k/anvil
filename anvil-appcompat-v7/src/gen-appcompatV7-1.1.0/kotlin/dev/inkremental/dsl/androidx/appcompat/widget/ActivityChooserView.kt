@@ -8,6 +8,7 @@ import androidx.core.view.ActionProvider
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.dsl.androidx.appcompat.AppcompatV7Setter
 import dev.inkremental.dsl.androidx.appcompat.CustomAppCompatv7Setter
@@ -15,10 +16,13 @@ import dev.inkremental.v
 import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun activityChooserView(configure: ActivityChooserViewScope.() -> Unit = {}) =
     v<ActivityChooserView>(configure.bind(ActivityChooserViewScope))
 abstract class ActivityChooserViewScope : ViewGroupScope() {
+  @JvmName("initActivityChooserView")
+  fun init(arg: (ActivityChooserView) -> Unit): Unit = initWith<ActivityChooserView>(arg)
   fun defaultActionButtonContentDescription(arg: Int): Unit =
       attr("defaultActionButtonContentDescription", arg)
   fun expandActivityOverflowButtonContentDescription(arg: Int): Unit =

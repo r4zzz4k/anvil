@@ -10,6 +10,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -21,6 +22,7 @@ import kotlin.Unit
 fun adapterView(configure: AdapterViewScope.() -> Unit = {}) =
     v<AdapterView<*>>(configure.bind(AdapterViewScope))
 abstract class AdapterViewScope : ViewGroupScope() {
+  override fun init(arg: (AdapterView<*>) -> Unit): Unit = initWith<AdapterView<*>>(arg)
   fun adapter(arg: Adapter): Unit = attr("adapter", arg)
   fun emptyView(arg: View): Unit = attr("emptyView", arg)
   fun onItemClick(arg: ((

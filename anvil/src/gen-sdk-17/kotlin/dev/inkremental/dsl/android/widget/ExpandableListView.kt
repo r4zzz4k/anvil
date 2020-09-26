@@ -11,6 +11,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Int
@@ -21,6 +22,7 @@ import kotlin.Unit
 fun expandableListView(configure: ExpandableListViewScope.() -> Unit = {}) =
     v<ExpandableListView>(configure.bind(ExpandableListViewScope))
 abstract class ExpandableListViewScope : ListViewScope() {
+  override fun init(arg: (ExpandableListView) -> Unit): Unit = initWith<ExpandableListView>(arg)
   fun adapter(arg: ExpandableListAdapter): Unit = attr("adapter", arg)
   fun childDivider(arg: Drawable): Unit = attr("childDivider", arg)
   fun childIndicator(arg: Drawable): Unit = attr("childIndicator", arg)

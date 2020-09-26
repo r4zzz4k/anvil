@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Array
 import kotlin.Boolean
@@ -20,6 +21,7 @@ import kotlin.Unit
 fun numberPicker(configure: NumberPickerScope.() -> Unit = {}) =
     v<NumberPicker>(configure.bind(NumberPickerScope))
 abstract class NumberPickerScope : LinearLayoutScope() {
+  override fun init(arg: (NumberPicker) -> Unit): Unit = initWith<NumberPicker>(arg)
   fun displayedValues(arg: Array<String>): Unit = attr("displayedValues", arg)
   fun formatter(arg: NumberPicker.Formatter): Unit = attr("formatter", arg)
   fun maxValue(arg: Int): Unit = attr("maxValue", arg)

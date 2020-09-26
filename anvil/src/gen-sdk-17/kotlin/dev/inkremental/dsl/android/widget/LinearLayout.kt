@@ -9,6 +9,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.v
 import kotlin.Boolean
@@ -20,6 +21,7 @@ import kotlin.Unit
 fun linearLayout(configure: LinearLayoutScope.() -> Unit = {}) =
     v<LinearLayout>(configure.bind(LinearLayoutScope))
 abstract class LinearLayoutScope : ViewGroupScope() {
+  override fun init(arg: (LinearLayout) -> Unit): Unit = initWith<LinearLayout>(arg)
   fun baselineAligned(arg: Boolean): Unit = attr("baselineAligned", arg)
   fun baselineAlignedChildIndex(arg: Int): Unit = attr("baselineAlignedChildIndex", arg)
   fun dividerDrawable(arg: Drawable): Unit = attr("dividerDrawable", arg)

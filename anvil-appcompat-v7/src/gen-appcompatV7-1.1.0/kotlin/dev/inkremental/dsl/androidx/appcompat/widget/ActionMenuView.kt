@@ -8,6 +8,7 @@ import androidx.appcompat.widget.ActionMenuView
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.androidx.appcompat.AppcompatV7Setter
 import dev.inkremental.dsl.androidx.appcompat.CustomAppCompatv7Setter
 import dev.inkremental.v
@@ -15,10 +16,13 @@ import kotlin.Boolean
 import kotlin.Int
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun actionMenuView(configure: ActionMenuViewScope.() -> Unit = {}) =
     v<ActionMenuView>(configure.bind(ActionMenuViewScope))
 abstract class ActionMenuViewScope : LinearLayoutCompatScope() {
+  @JvmName("initActionMenuView")
+  fun init(arg: (ActionMenuView) -> Unit): Unit = initWith<ActionMenuView>(arg)
   fun expandedActionViewsExclusive(arg: Boolean): Unit = attr("expandedActionViewsExclusive", arg)
   fun onMenuItemClick(arg: ((arg0: MenuItem) -> Boolean)?): Unit = attr("onMenuItemClick", arg)
   fun overflowIcon(arg: Drawable?): Unit = attr("overflowIcon", arg)

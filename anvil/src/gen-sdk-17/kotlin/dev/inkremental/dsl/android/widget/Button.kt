@@ -7,12 +7,14 @@ import dev.inkremental.Inkremental
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Suppress
 import kotlin.Unit
 
 fun button(configure: ButtonScope.() -> Unit = {}) = v<Button>(configure.bind(ButtonScope))
 abstract class ButtonScope : TextViewScope() {
+  override fun init(arg: (Button) -> Unit): Unit = initWith<Button>(arg)
   companion object : ButtonScope() {
     init {
       Inkremental.registerAttributeSetter(SdkSetter)

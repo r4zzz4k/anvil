@@ -8,6 +8,7 @@ import androidx.appcompat.view.menu.MenuBuilder
 import dev.inkremental.Inkremental
 import dev.inkremental.attr
 import dev.inkremental.bind
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.androidx.appcompat.AppcompatV7Setter
 import dev.inkremental.dsl.androidx.appcompat.CustomAppCompatv7Setter
 import dev.inkremental.dsl.androidx.appcompat.widget.AppCompatTextViewScope
@@ -16,10 +17,13 @@ import kotlin.Boolean
 import kotlin.CharSequence
 import kotlin.Suppress
 import kotlin.Unit
+import kotlin.jvm.JvmName
 
 fun actionMenuItemView(configure: ActionMenuItemViewScope.() -> Unit = {}) =
     v<ActionMenuItemView>(configure.bind(ActionMenuItemViewScope))
 abstract class ActionMenuItemViewScope : AppCompatTextViewScope() {
+  @JvmName("initActionMenuItemView")
+  fun init(arg: (ActionMenuItemView) -> Unit): Unit = initWith<ActionMenuItemView>(arg)
   fun checkable(arg: Boolean): Unit = attr("checkable", arg)
   fun checked(arg: Boolean): Unit = attr("checked", arg)
   fun expandedFormat(arg: Boolean): Unit = attr("expandedFormat", arg)

@@ -7,12 +7,14 @@ import dev.inkremental.Inkremental
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Suppress
 import kotlin.Unit
 
 fun checkBox(configure: CheckBoxScope.() -> Unit = {}) = v<CheckBox>(configure.bind(CheckBoxScope))
 abstract class CheckBoxScope : CompoundButtonScope() {
+  override fun init(arg: (CheckBox) -> Unit): Unit = initWith<CheckBox>(arg)
   companion object : CheckBoxScope() {
     init {
       Inkremental.registerAttributeSetter(SdkSetter)

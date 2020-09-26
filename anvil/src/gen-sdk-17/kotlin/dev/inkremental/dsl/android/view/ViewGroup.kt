@@ -11,6 +11,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.v
 import kotlin.Boolean
 import kotlin.Int
@@ -20,6 +21,7 @@ import kotlin.Unit
 fun viewGroup(configure: ViewGroupScope.() -> Unit = {}) =
     v<ViewGroup>(configure.bind(ViewGroupScope))
 abstract class ViewGroupScope : ViewScope() {
+  override fun init(arg: (ViewGroup) -> Unit): Unit = initWith<ViewGroup>(arg)
   fun addStatesFromChildren(arg: Boolean): Unit = attr("addStatesFromChildren", arg)
   fun alwaysDrawnWithCacheEnabled(arg: Boolean): Unit = attr("alwaysDrawnWithCacheEnabled", arg)
   fun animationCacheEnabled(arg: Boolean): Unit = attr("animationCacheEnabled", arg)

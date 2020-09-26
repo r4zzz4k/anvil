@@ -8,6 +8,7 @@ import dev.inkremental.attr
 import dev.inkremental.bind
 import dev.inkremental.dsl.android.CustomSdkSetter
 import dev.inkremental.dsl.android.SdkSetter
+import dev.inkremental.dsl.android.initWith
 import dev.inkremental.dsl.android.view.ViewGroupScope
 import dev.inkremental.v
 import kotlin.Suppress
@@ -16,6 +17,7 @@ import kotlin.Unit
 fun slidingDrawer(configure: SlidingDrawerScope.() -> Unit = {}) =
     v<SlidingDrawer>(configure.bind(SlidingDrawerScope))
 abstract class SlidingDrawerScope : ViewGroupScope() {
+  override fun init(arg: (SlidingDrawer) -> Unit): Unit = initWith<SlidingDrawer>(arg)
   fun onDrawerClose(arg: (() -> Unit)?): Unit = attr("onDrawerClose", arg)
   fun onDrawerOpen(arg: (() -> Unit)?): Unit = attr("onDrawerOpen", arg)
   fun onDrawerScroll(arg: SlidingDrawer.OnDrawerScrollListener?): Unit = attr("onDrawerScroll", arg)
